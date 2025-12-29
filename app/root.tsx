@@ -9,6 +9,9 @@ import {
 
 import type { Route } from "./+types/root";
 import { ThemeProvider } from "./lib/theme/ThemeProvider";
+import { AppProvider, useApp } from "./context/AppContext";
+import { NotificationSnackbar } from "./components/NotificationSnackbar";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -42,11 +45,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function App() {
+function AppContent() {
   return (
     <ThemeProvider>
       <Outlet />
+      <NotificationSnackbar />
+      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </ThemeProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <AppProvider>
+      <AppContent />
+    </AppProvider>
   );
 }
 

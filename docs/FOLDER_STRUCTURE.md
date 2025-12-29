@@ -119,5 +119,3 @@ lasuQuiz/
 4. **Route groups**: Organize by feature/role (student/, admin/)
 5. **Protection**: Implemented via route loaders and components
 
-
-

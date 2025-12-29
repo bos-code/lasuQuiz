@@ -22,7 +22,7 @@ Create a `.env` file in the root directory:
 
 ```env
 VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY=your_supabase_publishable_key
 ```
 
 ### 3. Supabase Database Setup
@@ -207,6 +207,4 @@ app/
 - Authentication flow is set up but needs Supabase configuration
 - Role-based access control is implemented via route loaders
 - All routes are typed with React Router's type generation
-
-
 
