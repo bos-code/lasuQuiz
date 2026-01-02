@@ -1,6 +1,6 @@
 import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { theme } from "./theme";
+import { theme, darkTheme } from "./theme";
 import { useMemo } from "react";
 
 interface ThemeProviderProps {
@@ -10,7 +10,7 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ children, mode = "light" }: ThemeProviderProps) {
   const currentTheme = useMemo(() => {
-    return mode === "dark" ? theme : theme; // You can switch to darkTheme when needed
+    return mode === "dark" ? darkTheme : theme;
   }, [mode]);
 
   return (

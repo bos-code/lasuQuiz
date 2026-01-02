@@ -65,6 +65,7 @@ Comprehensive documentation is available in the [`docs/`](./docs/) folder:
 - **[Routing Examples](./docs/ROUTING_EXAMPLE.md)** - How routing and protection works
 - **[Implementation Summary](./docs/IMPLEMENTATION_SUMMARY.md)** - Quick reference guide
 - **[Metadata Guide](./docs/METADATA_GUIDE.md)** - SEO and page metadata documentation
+- **[Theme Guide](./docs/THEME_GUIDE.md)** - MUI and Tailwind CSS theme integration
 
 ## 🏗️ Project Structure
 

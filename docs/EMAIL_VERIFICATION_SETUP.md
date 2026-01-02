@@ -131,3 +131,6 @@ For immediate testing:
 - **Supabase Email**: Built-in but limited
 - **AWS SES**: Cost-effective for high volume
 
+
+
+

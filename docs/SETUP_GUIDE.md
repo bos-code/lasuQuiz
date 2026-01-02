@@ -208,3 +208,6 @@ app/
 - Role-based access control is implemented via route loaders
 - All routes are typed with React Router's type generation
 
+
+
+

@@ -1,4 +1,10 @@
-import { Form, useActionData, useNavigation, Link, useSearchParams } from "react-router";
+import {
+  Form,
+  useActionData,
+  useNavigation,
+  Link,
+  useSearchParams,
+} from "react-router";
 import type { Route } from "./+types/login";
 import { signIn, signInWithOAuth } from "../lib/supabase/auth";
 import { redirect } from "react-router";
@@ -8,7 +14,7 @@ import { useEffect } from "react";
 
 function OAuthButton({ provider }: { provider: "google" | "apple" }) {
   const { showError } = useApp();
-  
+
   const handleOAuth = async () => {
     try {
       await signInWithOAuth(provider);
@@ -117,16 +123,19 @@ export default function Login() {
     if (verified) {
       showSuccess("Email verified successfully! Please sign in.");
     }
-    
+
     // Handle error query params from auth callback
     const errorParam = searchParams.get("error");
     if (errorParam) {
       const errorMessages: Record<string, string> = {
         auth_failed: "Authentication failed. Please try again.",
         user_not_found: "User not found. Please try signing in again.",
-        profile_creation_failed: "Failed to create user profile. Please contact support.",
+        profile_creation_failed:
+          "Failed to create user profile. Please contact support.",
       };
-      showError(errorMessages[errorParam] || "An error occurred. Please try again.");
+      showError(
+        errorMessages[errorParam] || "An error occurred. Please try again."
+      );
     }
   }, [registered, verified, searchParams, showSuccess, showError]);
 
@@ -138,7 +147,7 @@ export default function Login() {
   }, [actionData?.error, showError]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background flex items-center justify-center  py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
@@ -146,7 +155,6 @@ export default function Login() {
           </h2>
         </div>
         <Form method="post" className="mt-8 space-y-6">
-
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">
@@ -217,6 +225,3 @@ export default function Login() {
     </div>
   );
 }
-
-
-

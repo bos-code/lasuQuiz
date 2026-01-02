@@ -1,36 +1,63 @@
 import { createTheme } from "@mui/material/styles";
+import { colors } from "./colors";
 
 // Create a theme instance
 export const theme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: "#1976d2",
-      light: "#42a5f5",
-      dark: "#1565c0",
-      contrastText: "#fff",
+      main: colors.primary,
+      light: colors.primaryLight,
+      dark: colors.primaryDark,
+      contrastText: colors.primaryContrast,
     },
     secondary: {
-      main: "#9c27b0",
-      light: "#ba68c8",
-      dark: "#7b1fa2",
-      contrastText: "#fff",
+      main: colors.secondary,
+      light: colors.secondaryLight,
+      dark: colors.secondaryDark,
+      contrastText: colors.secondaryContrast,
     },
     error: {
-      main: "#d32f2f",
+      main: colors.error,
+      light: colors.errorLight,
+      dark: colors.errorDark,
     },
     warning: {
-      main: "#ed6c02",
+      main: colors.warning,
+      light: colors.warningLight,
+      dark: colors.warningDark,
     },
     info: {
-      main: "#0288d1",
+      main: colors.info,
+      light: colors.infoLight,
+      dark: colors.infoDark,
     },
     success: {
-      main: "#2e7d32",
+      main: colors.success,
+      light: colors.successLight,
+      dark: colors.successDark,
     },
     background: {
-      default: "#f5f5f5",
-      paper: "#ffffff",
+      default: colors.background,
+      paper: colors.surface,
+    },
+    text: {
+      primary: colors.textPrimary,
+      secondary: colors.textSecondary,
+      disabled: colors.textDisabled,
+    },
+    divider: colors.border,
+    grey: {
+      50: colors.gray50,
+      100: colors.gray100,
+      200: colors.gray200,
+      300: colors.gray300,
+      400: colors.gray400,
+      500: colors.gray500,
+      600: colors.gray600,
+      700: colors.gray700,
+      800: colors.gray800,
+      900: colors.gray900,
     },
   },
   typography: {
@@ -91,10 +118,47 @@ export const darkTheme = createTheme({
   palette: {
     ...theme.palette,
     mode: "dark",
-    background: {
-      default: "#121212",
-      paper: "#1e1e1e",
+    primary: {
+      main: colors.primary,
+      light: colors.primaryLight,
+      dark: colors.primaryDark,
+      contrastText: colors.primaryContrast,
     },
+    secondary: {
+      main: colors.secondary,
+      light: colors.secondaryLight,
+      dark: colors.secondaryDark,
+      contrastText: colors.secondaryContrast,
+    },
+    error: {
+      main: colors.error,
+      light: colors.errorLight,
+      dark: colors.errorDark,
+    },
+    warning: {
+      main: colors.warning,
+      light: colors.warningLight,
+      dark: colors.warningDark,
+    },
+    info: {
+      main: colors.info,
+      light: colors.infoLight,
+      dark: colors.infoDark,
+    },
+    success: {
+      main: colors.success,
+      light: colors.successLight,
+      dark: colors.successDark,
+    },
+    background: {
+      default: colors.backgroundDark,
+      paper: colors.surfaceDark,
+    },
+    text: {
+      primary: colors.textPrimaryDark,
+      secondary: colors.textSecondaryDark,
+      disabled: colors.textDisabledDark,
+    },
+    divider: colors.borderDark,
   },
 });
-

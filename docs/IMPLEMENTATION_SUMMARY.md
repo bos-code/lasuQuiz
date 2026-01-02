@@ -198,3 +198,6 @@ For questions about:
 - **Folder structure**: See `docs/FOLDER_STRUCTURE.md`
 - **Routes**: See `docs/ROUTE_MAP.md` and `docs/ROUTING_EXAMPLE.md`
 - **Setup**: See `docs/SETUP_GUIDE.md`
+
+
+
