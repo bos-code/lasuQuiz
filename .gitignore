@@ -5,3 +5,34 @@
 # React Router
 /.react-router/
 /build/
+
+# Logs
+logs
+*.log
+
+# Dependency directories
+jspm_packages/
+bower_components/
+# Optional npm cache directory
+.npm
+# Optional eslint cache                                                         
+.eslintcache
+# Optional stylelint cache
+.stylelintcache
+# Mac system files
+.DS_Store
+# Windows system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+# IDEs and editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj   
+*.sln
+package-lock.json
+yarn.lock
+.pnpm-lock.yaml
+# Temporary files
