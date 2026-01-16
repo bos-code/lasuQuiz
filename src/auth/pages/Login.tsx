@@ -34,7 +34,7 @@ const Login = () => {
     }, 900);
   };
 
-  const handleProvider = async (provider: "google" | "twitter" | "discord") => {
+  const handleProvider = async (provider: "google") => {
     setError("");
     setSuccess("Redirecting to provider...");
     try {

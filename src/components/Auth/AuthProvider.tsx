@@ -1,20 +1,24 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { PropsWithChildren } from "react";
-import type { Session } from "@supabase/supabase-js";
-import { supabase } from "../../lib/supabaseClient";
+import {
+  useAuth as useClerkAuth,
+  useClerk,
+  useSignIn,
+  useUser,
+} from "@clerk/clerk-react";
 
 type Profile = {
-  id: string;
+  id: string | null;
   email: string | null;
   role: "admin" | "user";
 };
 
 type AuthContextValue = {
-  session: Session | null;
+  session: { userId: string } | null;
   profile: Profile | null;
   loading: boolean;
   signInWithMagicLink: (email: string) => Promise<void>;
-  signInWithProvider: (provider: "google" | "twitter" | "discord") => Promise<void>;
+  signInWithProvider: (provider: "google") => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -23,97 +27,51 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 const DEFAULT_ADMIN_EMAIL = "chidera9713@gmail.com";
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
-  const [session, setSession] = useState<Session | null>(null);
+  const { isLoaded, isSignedIn, userId } = useClerkAuth();
+  const { signOut: clerkSignOut } = useClerk();
+  const { signIn } = useSignIn();
+  const { user } = useUser();
+  const [session, setSession] = useState<AuthContextValue["session"]>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
+    if (!isLoaded) return;
+    if (!isSignedIn || !userId || !user) {
+      setSession(null);
+      setProfile(null);
+      setLoading(false);
+      return;
+    }
+
+    const email = user.primaryEmailAddress?.emailAddress ?? null;
+    setSession({ userId });
+    setProfile({
+      id: userId,
+      email,
+      role: email === DEFAULT_ADMIN_EMAIL ? "admin" : "user",
     });
-
-    const { data: listener } = supabase.auth.onAuthStateChange((event, newSession) => {
-      setSession(newSession);
-      if (event === "SIGNED_OUT") {
-        setProfile(null);
-      }
-    });
-
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    const hydrateProfile = async () => {
-      if (!session?.user) {
-        setProfile(null);
-        setLoading(false);
-        return;
-      }
-
-      const email = session.user.email || "";
-      const baseProfile: Profile = {
-        id: session.user.id,
-        email,
-        role: email === DEFAULT_ADMIN_EMAIL ? "admin" : "user",
-      };
-
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("id, email, role")
-          .eq("id", session.user.id)
-          .maybeSingle();
-
-        if (error) throw error;
-
-        if (data) {
-          setProfile({
-            id: data.id,
-            email: data.email,
-            role: (data.role as Profile["role"]) || baseProfile.role,
-          });
-        } else {
-          // seed profile if missing
-          await supabase.from("profiles").insert([
-            { id: session.user.id, email, role: baseProfile.role },
-          ]);
-          setProfile(baseProfile);
-        }
-      } catch (err) {
-        console.error("Profile load error", err);
-        setProfile(baseProfile);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    setLoading(true);
-    void hydrateProfile();
-  }, [session]);
+    setLoading(false);
+  }, [isLoaded, isSignedIn, user, userId]);
 
   const signInWithMagicLink = async (email: string) => {
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-    });
-    if (error) throw error;
+    throw new Error("Magic link sign-in is disabled. Use email/password or social login.");
   };
 
-  const signInWithProvider = async (provider: "google" | "twitter" | "discord") => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+  const signInWithProvider = async (provider: "google") => {
+    if (!signIn) throw new Error("Sign-in is not ready yet");
+    if (provider !== "google") throw new Error("Only Google sign-in is supported");
+    await signIn.authenticateWithRedirect({
+      strategy: "oauth_google",
+      redirectUrl: `${window.location.origin}/sign-in`,
+      redirectUrlComplete: `${window.location.origin}/admin`,
     });
-    if (error) throw error;
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    await clerkSignOut();
+    setSession(null);
+    setProfile(null);
   };
 
   const value = useMemo(

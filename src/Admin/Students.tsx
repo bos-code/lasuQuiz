@@ -5,7 +5,6 @@ import { useInfiniteLoopDetector } from "../utils/useInfiniteLoopDetector";
 import { SEO } from "../components/SEO";
 import { getBreadcrumbStructuredData } from "../utils/structuredData";
 import { useNotification } from "../components/NotificationProvider";
-import { supabase } from "../lib/supabaseClient";
 import {
   Table,
   TableBody,
@@ -147,20 +146,25 @@ const Students = () => {
   const [inviteSending, setInviteSending] = useState(false);
 
   const handleInvite = async () => {
-    if (!inviteEmail) {
-      notify({ message: "Please enter an email.", severity: "warning" });
-      return;
-    }
+    const signUpLink = `${window.location.origin}/sign-up`;
     setInviteSending(true);
+
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: inviteEmail,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-      });
-      if (error) throw error;
-      notify({ message: "Invite sent! Ask the user to check their email.", severity: "success" });
-      setInviteEmail("");
+      if (inviteEmail) {
+        const subject = encodeURIComponent("Join LASU Quiz");
+        const body = encodeURIComponent(
+          `Hi,\n\nUse the link below to join LASU Quiz. Sign in with Google, Discord, Twitter, or your email and password.\n\n${signUpLink}\n\nThanks!`
+        );
+        window.location.href = `mailto:${inviteEmail}?subject=${subject}&body=${body}`;
+        notify({ message: "Opening your email client with an invite.", severity: "info" });
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(signUpLink);
+        notify({ message: "Sign-up link copied to clipboard.", severity: "success" });
+      } else {
+        notify({ message: "Copy this sign-up link: " + signUpLink, severity: "info", durationMs: 6000 });
+      }
       setInviteOpen(false);
+      setInviteEmail("");
     } catch (error) {
       notify({ message: (error as Error).message, severity: "error" });
     } finally {
@@ -348,7 +352,7 @@ const Students = () => {
               <div>
                 <h3 className="text-xl font-bold text-white">Invite User</h3>
                 <p className="text-sm text-gray-400">
-                  Send a passwordless magic link to onboard a user.
+                  Send the premium sign-up link to onboard teammates securely.
                 </p>
               </div>
               <button
@@ -375,7 +379,7 @@ const Students = () => {
                 {inviteSending ? "Sending..." : "Send invite"}
               </button>
               <p className="text-xs text-gray-500">
-                The invite uses a Supabase magic link and will redirect to /auth/callback.
+                Tip: leave the email empty to copy the sign-up link instead.
               </p>
             </div>
           </div>

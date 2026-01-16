@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import { ThemeProvider } from "@mui/material/styles";
+import { ClerkProvider } from "@clerk/clerk-react";
 import CssBaseline from "@mui/material/CssBaseline";
 import App from "./App.tsx";
 import { BrowserRouter } from "react-router-dom";
@@ -13,6 +14,11 @@ import { useAdminStore } from "./Admin/store/adminStore";
 import { AuthProvider } from "./components/Auth/AuthProvider";
 
 const queryClient = new QueryClient();
+const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+if (!clerkPublishableKey) {
+  throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY for Clerk");
+}
 
 const AppThemeProvider = ({ children }: { children: ReactNode }) => {
   const appearance = useAdminStore((s) => s.appearance);
@@ -65,16 +71,18 @@ const AppThemeProvider = ({ children }: { children: ReactNode }) => {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <HelmetProvider>
-      <BrowserRouter>
-        <QueryClientProvider client={queryClient}>
-          <AppThemeProvider>
-            <AuthProvider>
-              <App />
-            </AuthProvider>
-          </AppThemeProvider>
-          <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
-      </BrowserRouter>
+      <ClerkProvider publishableKey={clerkPublishableKey} afterSignOutUrl="/sign-in">
+        <BrowserRouter>
+          <QueryClientProvider client={queryClient}>
+            <AppThemeProvider>
+              <AuthProvider>
+                <App />
+              </AuthProvider>
+            </AppThemeProvider>
+            <ReactQueryDevtools initialIsOpen={false} />
+          </QueryClientProvider>
+        </BrowserRouter>
+      </ClerkProvider>
     </HelmetProvider>
   </StrictMode>
 );

@@ -1,17 +1,12 @@
 import GoogleIcon from "@mui/icons-material/Google";
-import TwitterIcon from "@mui/icons-material/Twitter";
-import ForumIcon from "@mui/icons-material/Forum";
-
 type Props = {
-  onClick: (provider: "google" | "twitter" | "discord") => void;
+  onClick: (provider: "google") => void;
 };
 
 const SocialButtons = ({ onClick }: Props) => {
   return (
-    <div className="grid grid-cols-3 gap-3">
-      <SocialButton label="Google" icon={<GoogleIcon fontSize="small" />} onClick={() => onClick("google")} />
-      <SocialButton label="Twitter" icon={<TwitterIcon fontSize="small" />} onClick={() => onClick("twitter")} />
-      <SocialButton label="Discord" icon={<ForumIcon fontSize="small" />} onClick={() => onClick("discord")} />
+    <div className="grid grid-cols-1 gap-3">
+      <SocialButton label="Continue with Google" icon={<GoogleIcon fontSize="small" />} onClick={() => onClick("google")} />
     </div>
   );
 };

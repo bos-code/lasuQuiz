@@ -4,8 +4,6 @@ import { useAuth } from "../components/Auth/AuthProvider";
 import { useNotification } from "../components/NotificationProvider";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import GoogleIcon from "@mui/icons-material/Google";
-import TwitterIcon from "@mui/icons-material/Twitter";
-import ForumIcon from "@mui/icons-material/Forum";
 
 const AuthPage = () => {
   const { signInWithMagicLink, signInWithProvider } = useAuth();
@@ -31,7 +29,7 @@ const AuthPage = () => {
     }
   };
 
-  const handleProvider = async (provider: "google" | "twitter" | "discord") => {
+  const handleProvider = async (provider: "google") => {
     try {
       await signInWithProvider(provider);
     } catch (error) {
@@ -50,7 +48,7 @@ const AuthPage = () => {
           </div>
           <h1 className="text-3xl font-bold mb-3">Welcome back</h1>
           <p className="text-gray-300 mb-6">
-            Sign in with a magic link or continue with Google, Twitter, or Discord.
+            Sign in with a magic link or continue with Google.
           </p>
           <div className="space-y-3">
             <AuthTile
@@ -94,27 +92,13 @@ const AuthPage = () => {
               <div className="h-px flex-1 bg-gray-700" />
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 gap-3">
               <button
                 onClick={() => handleProvider("google")}
                 className="px-3 py-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-gray-600 transition-colors flex items-center justify-center gap-2"
               >
                 <GoogleIcon fontSize="small" />
-                <span className="text-sm font-semibold">Google</span>
-              </button>
-              <button
-                onClick={() => handleProvider("twitter")}
-                className="px-3 py-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-gray-600 transition-colors flex items-center justify-center gap-2"
-              >
-                <TwitterIcon fontSize="small" />
-                <span className="text-sm font-semibold">Twitter</span>
-              </button>
-              <button
-                onClick={() => handleProvider("discord")}
-                className="px-3 py-3 bg-gray-800 border border-gray-700 rounded-lg hover:border-gray-600 transition-colors flex items-center justify-center gap-2"
-              >
-                <ForumIcon fontSize="small" />
-                <span className="text-sm font-semibold">Discord</span>
+                <span className="text-sm font-semibold">Continue with Google</span>
               </button>
             </div>
 

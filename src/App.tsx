@@ -1,40 +1,47 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { SignedIn, SignedOut } from "@clerk/clerk-react";
 import AdminLayout from "./Admin/AdminLayout";
 import AdminRoutes from "./Admin/AdminRoutes";
 import QuizPage from "./features/Quiz/QuizPage";
 import Home from "./pages/Home";
-import AuthPage from "./pages/Auth";
-import AuthCallback from "./pages/AuthCallback";
-import Login from "./auth/pages/Login";
-import Signup from "./auth/pages/Signup";
-import ForgotPassword from "./auth/pages/ForgotPassword";
-import ResetPassword from "./auth/pages/ResetPassword";
+import SignInPage from "./pages/auth/SignInPage";
+import SignUpPage from "./pages/auth/SignUpPage";
 import "./App.css";
 import { NotificationProvider } from "./components/NotificationProvider";
-import RequireAuth from "./components/Auth/RequireAuth";
+
+const Protected = ({ children }: { children: React.ReactElement }) => (
+  <>
+    <SignedIn>{children}</SignedIn>
+    <SignedOut>
+      <Navigate to="/sign-in" replace />
+    </SignedOut>
+  </>
+);
 
 function App() {
   return (
     <NotificationProvider>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/auth" element={<AuthPage />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/forgot" element={<ForgotPassword />} />
-        <Route path="/reset" element={<ResetPassword />} />
+        <Route path="/sign-in/*" element={<SignInPage />} />
+        <Route path="/sign-up/*" element={<SignUpPage />} />
+        <Route path="/auth/*" element={<Navigate to="/sign-in" replace />} />
+        <Route path="/login" element={<Navigate to="/sign-in" replace />} />
+        <Route path="/signup" element={<Navigate to="/sign-up" replace />} />
+        <Route path="/forgot" element={<Navigate to="/sign-in" replace />} />
+        <Route path="/reset" element={<Navigate to="/sign-in" replace />} />
         <Route
           path="/admin/*"
           element={
-            <RequireAuth>
+            <Protected>
               <AdminLayout>
                 <AdminRoutes />
               </AdminLayout>
-            </RequireAuth>
+            </Protected>
           }
         />
         <Route path="/quiz/:id" element={<QuizPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </NotificationProvider>
   );

@@ -1,13 +1,13 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "./AuthProvider";
+import { useAuth as useClerkAuth } from "@clerk/clerk-react";
 
 type RequireAuthProps = { children: React.ReactElement };
 
 const RequireAuth = ({ children }: RequireAuthProps) => {
-  const { session, loading } = useAuth();
+  const { isLoaded, isSignedIn } = useClerkAuth();
   const location = useLocation();
 
-  if (loading) {
+  if (!isLoaded) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center text-gray-300">
         Loading...
@@ -15,8 +15,8 @@ const RequireAuth = ({ children }: RequireAuthProps) => {
     );
   }
 
-  if (!session) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+  if (!isSignedIn) {
+    return <Navigate to="/sign-in" state={{ from: location }} replace />;
   }
 
   return children;
