@@ -10,17 +10,29 @@ const AuthCallback = () => {
 
   useEffect(() => {
     const handleCallback = async () => {
-      const { data, error } = await supabase.auth.exchangeCodeForSession(
-        location.hash || location.search
-      );
-      if (error) {
-        notify({ message: error.message, severity: "error" });
-        navigate("/auth");
+      const codePayload = location.hash || location.search;
+
+      if (codePayload) {
+        const { error } = await supabase.auth.exchangeCodeForSession(codePayload);
+        if (error) {
+          notify({ message: error.message, severity: "error" });
+          navigate("/auth", { replace: true });
+          return;
+        }
+      }
+
+      const { data, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        notify({ message: sessionError.message, severity: "error" });
+        navigate("/auth", { replace: true });
         return;
       }
+
       if (data.session) {
         notify({ message: "Signed in successfully", severity: "success" });
         navigate("/admin", { replace: true });
+      } else {
+        navigate("/auth", { replace: true });
       }
     };
     void handleCallback();

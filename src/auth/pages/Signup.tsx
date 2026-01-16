@@ -5,9 +5,13 @@ import AuthLayout from "../components/AuthLayout";
 import AuthCard from "../components/AuthCard";
 import InputField from "../components/InputField";
 import SocialButtons from "../components/SocialButtons";
+import { useAuth } from "../../components/Auth/AuthProvider";
+import { useNotification } from "../../components/NotificationProvider";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { signInWithProvider } = useAuth();
+  const notify = useNotification();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -35,8 +39,17 @@ const Signup = () => {
     }, 1000);
   };
 
-  const handleProvider = () => {
+  const handleProvider = async (provider: "google" | "twitter" | "discord") => {
+    setError("");
     setSuccess("Redirecting to provider...");
+    try {
+      await signInWithProvider(provider);
+    } catch (err) {
+      const message = (err as Error).message;
+      setSuccess("");
+      setError(message);
+      notify({ message, severity: "error" });
+    }
   };
 
   const shake = error ? { x: [-6, 6, -4, 4, 0] } : undefined;
