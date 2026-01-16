@@ -12,7 +12,7 @@ export const useInfiniteLoopDetector = (
   threshold: number = 50
 ) => {
   // Only run in development
-  const isDev = process.env.NODE_ENV === "development";
+  const isDev = import.meta.env.MODE === "development";
   
   const renderCount = useRef(0);
   const lastRenderTime = useRef(Date.now());
@@ -56,4 +56,3 @@ export const useInfiniteLoopDetector = (
     warningShown.current = true;
   }
 };
-

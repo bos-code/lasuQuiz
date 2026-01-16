@@ -17,7 +17,6 @@ const QuizPage = () => {
     score,
     lives,
     questions,
-    timeRemaining,
     quizTitle,
     selectAnswer,
     nextQuestion,
@@ -257,4 +256,3 @@ const QuizPage = () => {
 };
 
 export default QuizPage;
-

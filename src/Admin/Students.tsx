@@ -1,4 +1,5 @@
 import { useMemo, useCallback } from "react";
+import type { ChangeEvent } from "react";
 import { useAdminStore } from "./store/adminStore";
 import { useInfiniteLoopDetector } from "../utils/useInfiniteLoopDetector";
 import { SEO } from "../components/SEO";
@@ -30,11 +31,11 @@ const Students = () => {
 
   // Select individual slices to keep getSnapshot stable
   const headerSearch = useAdminStore((s) => s.headerSearch);
-  // const setHeaderSearch = useAdminStore((s) => s.setHeaderSearch);
+  const setHeaderSearch = useAdminStore((s) => s.setHeaderSearch);
   const activeStudentTab = useAdminStore((s) => s.activeStudentTab);
   const setActiveStudentTab = useAdminStore((s) => s.setActiveStudentTab);
   const studentSearch = useAdminStore((s) => s.studentSearch);
-  // const setStudentSearch = useAdminStore((s) => s.setStudentSearch);
+  const setStudentSearch = useAdminStore((s) => s.setStudentSearch);
   const studentSortBy = useAdminStore((s) => s.studentSortBy);
   const setStudentSortBy = useAdminStore((s) => s.setStudentSortBy);
   const students = useAdminStore((s) => s.students);
@@ -79,14 +80,13 @@ const Students = () => {
     []
   );
 
-  function handleHeaderSearchChange(e) {
-    e.preventDefault();
-    console.log(e);
-  }
+  const handleHeaderSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setHeaderSearch(event.target.value);
+  };
 
-  function handleStudentSearchChange(e) {
-    handleHeaderSearchChange(e);
-  }
+  const handleStudentSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setStudentSearch(event.target.value);
+  };
 
   const handleUserClick = useCallback(
     (user: any) => {

@@ -1,5 +1,4 @@
 import { useField } from "formik";
-import { colors } from "../../theme/colors";
 
 interface TextInputProps {
   name: string;
@@ -48,5 +47,4 @@ export const TextInput = ({
     </div>
   );
 };
-
 

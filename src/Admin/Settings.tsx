@@ -1,5 +1,6 @@
 import { useAdminStore } from "./store/adminStore";
 import { useState, useEffect } from "react";
+import type { ChangeEvent } from "react";
 // import { shallow } from "zustand/shallow";
 import { useNotification } from "../components/NotificationProvider";
 import SearchIcon from "@mui/icons-material/Search";
@@ -20,7 +21,7 @@ import CheckIcon from "@mui/icons-material/Check";
 const Settings = () => {
   const notify = useNotification();
   const headerSearch = useAdminStore((s) => s.headerSearch);
-  // const setHeaderSearch = useAdminStore(s => s.setHeaderSearch);
+  const setHeaderSearch = useAdminStore((s) => s.setHeaderSearch);
   const activeSettingsTab = useAdminStore((s) => s.activeSettingsTab);
   const setActiveSettingsTab = useAdminStore((s) => s.setActiveSettingsTab);
   const profile = useAdminStore((s) => s.profile);
@@ -104,6 +105,10 @@ const Settings = () => {
         severity: "info",
       });
     }
+  };
+
+  const handleHeaderSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setHeaderSearch(event.target.value);
   };
 
   return (
