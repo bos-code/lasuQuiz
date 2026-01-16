@@ -1,14 +1,15 @@
 import { useAdminStore } from "./store/adminStore";
-import { useState, useEffect, useCallback } from "react";
-import { shallow } from "zustand/shallow";
+import { useState, useEffect } from "react";
+// import { shallow } from "zustand/shallow";
+import { useNotification } from "../components/NotificationProvider";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import PersonIcon from "@mui/icons-material/Person";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import LockIcon from "@mui/icons-material/Lock";
+// import LockIcon from "@mui/icons-material/Lock";
 import GoogleIcon from "@mui/icons-material/Google";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import PaletteIcon from "@mui/icons-material/Palette";
+// import PaletteIcon from "@mui/icons-material/Palette";?
 import LanguageIcon from "@mui/icons-material/Language";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
@@ -17,17 +18,18 @@ import ComputerIcon from "@mui/icons-material/Computer";
 import CheckIcon from "@mui/icons-material/Check";
 
 const Settings = () => {
-  const headerSearch = useAdminStore(s => s.headerSearch);
-  const setHeaderSearch = useAdminStore(s => s.setHeaderSearch);
-  const activeSettingsTab = useAdminStore(s => s.activeSettingsTab);
-  const setActiveSettingsTab = useAdminStore(s => s.setActiveSettingsTab);
-  const profile = useAdminStore(s => s.profile);
-  const updateProfile = useAdminStore(s => s.updateProfile);
-  const account = useAdminStore(s => s.account);
-  const updateAccount = useAdminStore(s => s.updateAccount);
-  const toggleGoogleConnection = useAdminStore(s => s.toggleGoogleConnection);
-  const appearance = useAdminStore(s => s.appearance);
-  const updateAppearance = useAdminStore(s => s.updateAppearance);
+  const notify = useNotification();
+  const headerSearch = useAdminStore((s) => s.headerSearch);
+  // const setHeaderSearch = useAdminStore(s => s.setHeaderSearch);
+  const activeSettingsTab = useAdminStore((s) => s.activeSettingsTab);
+  const setActiveSettingsTab = useAdminStore((s) => s.setActiveSettingsTab);
+  const profile = useAdminStore((s) => s.profile);
+  const updateProfile = useAdminStore((s) => s.updateProfile);
+  const account = useAdminStore((s) => s.account);
+  const updateAccount = useAdminStore((s) => s.updateAccount);
+  const toggleGoogleConnection = useAdminStore((s) => s.toggleGoogleConnection);
+  const appearance = useAdminStore((s) => s.appearance);
+  const updateAppearance = useAdminStore((s) => s.updateAppearance);
 
   const [formData, setFormData] = useState(profile);
   const [passwordData, setPasswordData] = useState({
@@ -41,7 +43,14 @@ const Settings = () => {
     setFormData(profile);
   }, [profile]);
 
-  const settingsTabs: ("Profile" | "Account" | "Notifications" | "Appearance" | "Privacy" | "Billing")[] = [
+  const settingsTabs: (
+    | "Profile"
+    | "Account"
+    | "Notifications"
+    | "Appearance"
+    | "Privacy"
+    | "Billing"
+  )[] = [
     "Profile",
     "Account",
     "Notifications",
@@ -54,18 +63,21 @@ const Settings = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handlePasswordChange = (field: keyof typeof passwordData, value: string) => {
+  const handlePasswordChange = (
+    field: keyof typeof passwordData,
+    value: string
+  ) => {
     setPasswordData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSaveChanges = () => {
     updateProfile(formData);
-    alert("Profile updated successfully!");
+    notify({ message: "Profile updated successfully!", severity: "success" });
   };
 
   const handleUpdatePassword = () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("New passwords do not match!");
+      notify({ message: "New passwords do not match!", severity: "warning" });
       return;
     }
     updateAccount({
@@ -73,13 +85,24 @@ const Settings = () => {
       newPassword: passwordData.newPassword,
       confirmPassword: passwordData.confirmPassword,
     });
-    setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
-    alert("Password updated successfully!");
+    setPasswordData({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+    notify({ message: "Password updated successfully!", severity: "success" });
   };
 
   const handleDeleteAccount = () => {
-    if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-      alert("Account deletion would be processed here.");
+    if (
+      window.confirm(
+        "Are you sure you want to delete your account? This action cannot be undone."
+      )
+    ) {
+      notify({
+        message: "Account deletion would be processed here.",
+        severity: "info",
+      });
     }
   };
 
@@ -88,7 +111,10 @@ const Settings = () => {
       {/* Top Header */}
       <header className="bg-gray-800 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
         <div className="relative flex-1 max-w-md">
-          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fontSize="small" />
+          <SearchIcon
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            fontSize="small"
+          />
           <input
             type="text"
             placeholder="Search..."
@@ -109,7 +135,9 @@ const Settings = () => {
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-white mb-2">Settings</h1>
-            <p className="text-gray-400">Manage your account settings and preferences</p>
+            <p className="text-gray-400">
+              Manage your account settings and preferences
+            </p>
           </div>
 
           {/* Settings Tabs */}
@@ -133,8 +161,12 @@ const Settings = () => {
           {activeSettingsTab === "Profile" && (
             <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
               <div className="mb-6">
-                <h2 className="text-xl font-bold text-white mb-2">Profile Information</h2>
-                <p className="text-gray-400 text-sm">Update your profile information and public details</p>
+                <h2 className="text-xl font-bold text-white mb-2">
+                  Profile Information
+                </h2>
+                <p className="text-gray-400 text-sm">
+                  Update your profile information and public details
+                </p>
               </div>
 
               <div className="flex flex-col lg:flex-row gap-6">
@@ -161,47 +193,65 @@ const Settings = () => {
                 <div className="flex-1 space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">First Name</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        First Name
+                      </label>
                       <input
                         type="text"
                         value={formData.firstName}
-                        onChange={(e) => handleInputChange("firstName", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("firstName", e.target.value)
+                        }
                         className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Last Name</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Last Name
+                      </label>
                       <input
                         type="text"
                         value={formData.lastName}
-                        onChange={(e) => handleInputChange("lastName", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("lastName", e.target.value)
+                        }
                         className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Email
+                    </label>
                     <input
                       type="email"
                       value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("email", e.target.value)
+                      }
                       className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Role</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Role
+                    </label>
                     <input
                       type="text"
                       value={formData.role}
-                      onChange={(e) => handleInputChange("role", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("role", e.target.value)
+                      }
                       className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Bio</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Bio
+                    </label>
                     <textarea
                       value={formData.bio}
                       onChange={(e) => handleInputChange("bio", e.target.value)}
@@ -229,39 +279,55 @@ const Settings = () => {
               {/* Account Security Section */}
               <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
                 <div className="mb-6">
-                  <h2 className="text-xl font-bold text-white mb-2">Account Security</h2>
-                  <p className="text-gray-400 text-sm">Update your password and security settings</p>
+                  <h2 className="text-xl font-bold text-white mb-2">
+                    Account Security
+                  </h2>
+                  <p className="text-gray-400 text-sm">
+                    Update your password and security settings
+                  </p>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Current Password</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Current Password
+                    </label>
                     <input
                       type="password"
                       value={passwordData.currentPassword}
-                      onChange={(e) => handlePasswordChange("currentPassword", e.target.value)}
+                      onChange={(e) =>
+                        handlePasswordChange("currentPassword", e.target.value)
+                      }
                       placeholder="Enter current password"
                       className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">New Password</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      New Password
+                    </label>
                     <input
                       type="password"
                       value={passwordData.newPassword}
-                      onChange={(e) => handlePasswordChange("newPassword", e.target.value)}
+                      onChange={(e) =>
+                        handlePasswordChange("newPassword", e.target.value)
+                      }
                       placeholder="Enter new password"
                       className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Confirm New Password</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Confirm New Password
+                    </label>
                     <input
                       type="password"
                       value={passwordData.confirmPassword}
-                      onChange={(e) => handlePasswordChange("confirmPassword", e.target.value)}
+                      onChange={(e) =>
+                        handlePasswordChange("confirmPassword", e.target.value)
+                      }
                       placeholder="Confirm new password"
                       className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
@@ -281,8 +347,12 @@ const Settings = () => {
               {/* Connected Accounts Section */}
               <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
                 <div className="mb-6">
-                  <h2 className="text-xl font-bold text-white mb-2">Connected Accounts</h2>
-                  <p className="text-gray-400 text-sm">Connect your account to other services</p>
+                  <h2 className="text-xl font-bold text-white mb-2">
+                    Connected Accounts
+                  </h2>
+                  <p className="text-gray-400 text-sm">
+                    Connect your account to other services
+                  </p>
                 </div>
 
                 <div className="space-y-4">
@@ -290,7 +360,9 @@ const Settings = () => {
                     <div className="flex items-center gap-3">
                       <GoogleIcon className="text-2xl text-blue-400" />
                       <div>
-                        <p className="text-white font-medium">Connect your Google account</p>
+                        <p className="text-white font-medium">
+                          Connect your Google account
+                        </p>
                       </div>
                     </div>
                     <button
@@ -310,15 +382,22 @@ const Settings = () => {
               {/* Danger Zone Section */}
               <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
                 <div className="mb-6">
-                  <h2 className="text-xl font-bold text-red-400 mb-2">Danger Zone</h2>
-                  <p className="text-gray-400 text-sm">Irreversible actions for your account</p>
+                  <h2 className="text-xl font-bold text-red-400 mb-2">
+                    Danger Zone
+                  </h2>
+                  <p className="text-gray-400 text-sm">
+                    Irreversible actions for your account
+                  </p>
                 </div>
 
                 <div className="flex items-center justify-between p-4 bg-gray-700/50 rounded-lg border border-gray-600">
                   <div className="flex-1">
-                    <h3 className="text-white font-semibold mb-1">Delete Account</h3>
+                    <h3 className="text-white font-semibold mb-1">
+                      Delete Account
+                    </h3>
                     <p className="text-gray-400 text-sm">
-                      Once you delete your account, there is no going back. All your data will be permanently removed.
+                      Once you delete your account, there is no going back. All
+                      your data will be permanently removed.
                     </p>
                   </div>
                   <button
@@ -340,7 +419,9 @@ const Settings = () => {
               <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
                 <div className="mb-6">
                   <h2 className="text-xl font-bold text-white mb-2">Theme</h2>
-                  <p className="text-gray-400 text-sm">Choose your preferred theme</p>
+                  <p className="text-gray-400 text-sm">
+                    Choose your preferred theme
+                  </p>
                 </div>
                 <div className="flex gap-4">
                   {(["System", "Light", "Dark"] as const).map((theme) => (
@@ -354,12 +435,21 @@ const Settings = () => {
                       }`}
                     >
                       <div className="flex flex-col items-center gap-2">
-                        {theme === "System" && <ComputerIcon className="text-2xl text-gray-300" />}
-                        {theme === "Light" && <Brightness6Icon className="text-2xl text-gray-300" />}
-                        {theme === "Dark" && <Brightness4Icon className="text-2xl text-gray-300" />}
+                        {theme === "System" && (
+                          <ComputerIcon className="text-2xl text-gray-300" />
+                        )}
+                        {theme === "Light" && (
+                          <Brightness6Icon className="text-2xl text-gray-300" />
+                        )}
+                        {theme === "Dark" && (
+                          <Brightness4Icon className="text-2xl text-gray-300" />
+                        )}
                         <span className="text-white font-medium">{theme}</span>
                         {appearance.theme === theme && (
-                          <CheckIcon className="text-purple-400" fontSize="small" />
+                          <CheckIcon
+                            className="text-purple-400"
+                            fontSize="small"
+                          />
                         )}
                       </div>
                     </button>
@@ -370,13 +460,19 @@ const Settings = () => {
               {/* Language Section */}
               <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
                 <div className="mb-6">
-                  <h2 className="text-xl font-bold text-white mb-2">Language</h2>
-                  <p className="text-gray-400 text-sm">Select your preferred language</p>
+                  <h2 className="text-xl font-bold text-white mb-2">
+                    Language
+                  </h2>
+                  <p className="text-gray-400 text-sm">
+                    Select your preferred language
+                  </p>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <LanguageIcon className="text-2xl text-gray-400" />
-                    <span className="text-white font-medium">{appearance.language}</span>
+                    <span className="text-white font-medium">
+                      {appearance.language}
+                    </span>
                   </div>
                   <button className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors">
                     Change Language
@@ -387,13 +483,19 @@ const Settings = () => {
               {/* Font Size Section */}
               <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
                 <div className="mb-6">
-                  <h2 className="text-xl font-bold text-white mb-2">Font Size</h2>
-                  <p className="text-gray-400 text-sm">Adjust the font size to your preference</p>
+                  <h2 className="text-xl font-bold text-white mb-2">
+                    Font Size
+                  </h2>
+                  <p className="text-gray-400 text-sm">
+                    Adjust the font size to your preference
+                  </p>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <TextFieldsIcon className="text-2xl text-gray-400" />
-                    <span className="text-white font-medium">{appearance.fontSize}</span>
+                    <span className="text-white font-medium">
+                      {appearance.fontSize}
+                    </span>
                   </div>
                   <button className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors">
                     Change Font Size
@@ -404,11 +506,24 @@ const Settings = () => {
               {/* Color Scheme Section */}
               <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
                 <div className="mb-6">
-                  <h2 className="text-xl font-bold text-white mb-2">Color Scheme</h2>
-                  <p className="text-gray-400 text-sm">Choose your preferred color scheme</p>
+                  <h2 className="text-xl font-bold text-white mb-2">
+                    Color Scheme
+                  </h2>
+                  <p className="text-gray-400 text-sm">
+                    Choose your preferred color scheme
+                  </p>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
-                  {(["Purple", "Blue", "Green", "Orange", "Pink", "Red"] as const).map((color) => {
+                  {(
+                    [
+                      "Purple",
+                      "Blue",
+                      "Green",
+                      "Orange",
+                      "Pink",
+                      "Red",
+                    ] as const
+                  ).map((color) => {
                     const colorClasses: Record<string, string> = {
                       Purple: "bg-purple-600",
                       Blue: "bg-blue-600",
@@ -428,10 +543,17 @@ const Settings = () => {
                         }`}
                       >
                         <div className="flex flex-col items-center gap-2">
-                          <div className={`w-12 h-12 rounded-full ${colorClasses[color]}`}></div>
-                          <span className="text-white font-medium text-sm">{color}</span>
+                          <div
+                            className={`w-12 h-12 rounded-full ${colorClasses[color]}`}
+                          ></div>
+                          <span className="text-white font-medium text-sm">
+                            {color}
+                          </span>
                           {appearance.colorScheme === color && (
-                            <CheckIcon className="text-purple-400" fontSize="small" />
+                            <CheckIcon
+                              className="text-purple-400"
+                              fontSize="small"
+                            />
                           )}
                         </div>
                       </button>
@@ -443,17 +565,24 @@ const Settings = () => {
           )}
 
           {/* Other Tabs Placeholder */}
-          {activeSettingsTab !== "Profile" && activeSettingsTab !== "Account" && activeSettingsTab !== "Appearance" && (
-            <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-              <h2 className="text-xl font-bold text-white mb-2">{activeSettingsTab}</h2>
-              <p className="text-gray-400">This section is coming soon.</p>
-            </div>
-          )}
+          {activeSettingsTab !== "Profile" &&
+            activeSettingsTab !== "Account" &&
+            activeSettingsTab !== "Appearance" && (
+              <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
+                <h2 className="text-xl font-bold text-white mb-2">
+                  {activeSettingsTab}
+                </h2>
+                <p className="text-gray-400">This section is coming soon.</p>
+              </div>
+            )}
 
           {/* Footer */}
           <div className="mt-6 text-center text-gray-400 text-sm">
             Need help with your account settings?{" "}
-            <a href="#" className="text-purple-400 hover:text-purple-300 transition-colors">
+            <a
+              href="#"
+              className="text-purple-400 hover:text-purple-300 transition-colors"
+            >
               Contact Support
             </a>
           </div>

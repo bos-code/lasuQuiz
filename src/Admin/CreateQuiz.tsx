@@ -1,13 +1,17 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useCreateQuizStore } from "./store/createQuizStore";
+import QuizPreviewModal from "./QuizPreviewModal";
+import { useNotification } from "../components/NotificationProvider";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 const CreateQuiz = () => {
   const navigate = useNavigate();
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const notify = useNotification();
   const {
     quizTitle,
     description,
@@ -32,12 +36,11 @@ const CreateQuiz = () => {
 
   const handleSaveDraft = () => {
     // Save draft logic here
-    alert("Draft saved!");
+    notify({ message: "Draft saved!", severity: "success" });
   };
 
   const handlePreview = () => {
-    // Preview logic here
-    alert("Preview functionality");
+    setPreviewOpen(true);
   };
 
   const handleNext = () => {
@@ -258,12 +261,12 @@ const CreateQuiz = () => {
           </div>
         </div>
       </div>
+
+      <QuizPreviewModal open={previewOpen} onClose={() => setPreviewOpen(false)} />
     </>
   );
 };
 
 export default CreateQuiz;
-
-
 
 

@@ -30,11 +30,11 @@ const Students = () => {
 
   // Select individual slices to keep getSnapshot stable
   const headerSearch = useAdminStore((s) => s.headerSearch);
-  const setHeaderSearch = useAdminStore((s) => s.setHeaderSearch);
+  // const setHeaderSearch = useAdminStore((s) => s.setHeaderSearch);
   const activeStudentTab = useAdminStore((s) => s.activeStudentTab);
   const setActiveStudentTab = useAdminStore((s) => s.setActiveStudentTab);
   const studentSearch = useAdminStore((s) => s.studentSearch);
-  const setStudentSearch = useAdminStore((s) => s.setStudentSearch);
+  // const setStudentSearch = useAdminStore((s) => s.setStudentSearch);
   const studentSortBy = useAdminStore((s) => s.studentSortBy);
   const setStudentSortBy = useAdminStore((s) => s.setStudentSortBy);
   const students = useAdminStore((s) => s.students);

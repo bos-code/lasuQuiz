@@ -1,4 +1,5 @@
 import { useMemo, useCallback, memo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAdminStore } from "./store/adminStore";
 import { useInfiniteLoopDetector } from "../utils/useInfiniteLoopDetector";
 import { SEO } from "../components/SEO";
@@ -14,6 +15,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import BarChartIcon from "@mui/icons-material/BarChart";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   // Debug infinite loops in development
   // Hooks must be called unconditionally - the hook itself handles dev check
   useInfiniteLoopDetector("Dashboard");
@@ -55,6 +57,10 @@ const Dashboard = () => {
     { name: "Dashboard", url: "/admin" },
   ]);
 
+  const goToCreateQuiz = useCallback(() => {
+    navigate("/admin/quizzes/create");
+  }, [navigate]);
+
   return (
     <>
       <SEO
@@ -78,7 +84,10 @@ const Dashboard = () => {
             className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
           />
         </div>
-        <button className="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
+        <button
+          onClick={goToCreateQuiz}
+          className="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+        >
           <AddIcon fontSize="small" />
           <span>Create Quiz</span>
         </button>
@@ -96,7 +105,10 @@ const Dashboard = () => {
                 Welcome back, Sarah! Here's what's happening with your quizzes.
               </p>
             </div>
-            <button className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
+            <button
+              onClick={goToCreateQuiz}
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+            >
               <AddIcon fontSize="small" />
               <span>Create New Quiz</span>
             </button>

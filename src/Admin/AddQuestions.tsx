@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateQuizStore, type QuizQuestion } from "./store/createQuizStore";
+import QuizPreviewModal from "./QuizPreviewModal";
+import { useNotification } from "../components/NotificationProvider";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import AddIcon from "@mui/icons-material/Add";
@@ -12,6 +14,8 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 
 const AddQuestions = () => {
   const navigate = useNavigate();
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const notify = useNotification();
   const showBulkModal = useCreateQuizStore(s => s.showBulkModal);
   const setShowBulkModal = useCreateQuizStore(s => s.setShowBulkModal);
   const [bulkText, setBulkText] = useState("");
@@ -29,11 +33,11 @@ const AddQuestions = () => {
   } = useCreateQuizStore();
 
   const handleSaveDraft = () => {
-    alert("Draft saved!");
+    notify({ message: "Draft saved!", severity: "success" });
   };
 
   const handlePreview = () => {
-    alert("Preview functionality");
+    setPreviewOpen(true);
   };
 
   const handlePrev = () => {
@@ -133,23 +137,23 @@ const AddQuestions = () => {
 
   const handleBulkSubmit = () => {
     if (!bulkText.trim()) {
-      alert("Please enter questions in the text area");
+      notify({ message: "Please enter questions in the text area", severity: "warning" });
       return;
     }
 
     try {
       const parsedQuestions = parseBulkQuestions(bulkText);
       if (parsedQuestions.length === 0) {
-        alert("No valid questions found. Please check the format.");
+        notify({ message: "No valid questions found. Please check the format.", severity: "warning" });
         return;
       }
 
       addBulkQuestions(parsedQuestions);
       setBulkText("");
       setShowBulkModal(false);
-      alert(`Successfully added ${parsedQuestions.length} question(s)!`);
+      notify({ message: `Added ${parsedQuestions.length} question(s).`, severity: "success" });
     } catch (error) {
-      alert("Error parsing questions. Please check the format and try again.");
+      notify({ message: "Error parsing questions. Please check the format and try again.", severity: "error" });
       console.error("Bulk add error:", error);
     }
   };
@@ -418,9 +422,10 @@ Answer: B`}
           </div>
         </div>
       )}
+
+      <QuizPreviewModal open={previewOpen} onClose={() => setPreviewOpen(false)} />
     </>
   );
 };
 
 export default AddQuestions;
-
