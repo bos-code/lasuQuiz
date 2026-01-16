@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import {
@@ -14,6 +14,7 @@ import {
   Stack,
   Chip,
   Paper,
+  Tooltip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
@@ -21,8 +22,14 @@ import EmailIcon from "@mui/icons-material/Email";
 import WorkIcon from "@mui/icons-material/Work";
 import PersonIcon from "@mui/icons-material/Person";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import LogoutIcon from "@mui/icons-material/Logout";
+import ShieldIcon from "@mui/icons-material/Shield";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useAdminStore } from "./store/adminStore";
 import { TextInput, TextArea, Button as CustomButton } from "../components/forms";
+import { useUser } from "@clerk/clerk-react";
+import { useNotification } from "../components/NotificationProvider";
+import { useAuth } from "../components/Auth/AuthProvider";
 
 interface ProfileModalProps {
   open: boolean;
@@ -49,23 +56,60 @@ const validationSchema = Yup.object({
 });
 
 const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
-  const profile = useAdminStore(s => s.profile);
-  const updateProfile = useAdminStore(s => s.updateProfile);
+  const profile = useAdminStore((s) => s.profile);
+  const updateProfile = useAdminStore((s) => s.updateProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
     profile.profilePicture || null
   );
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const { user, isLoaded } = useUser();
+  const notify = useNotification();
+  const { signOut } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
 
-  const handleSave = (values: typeof profile) => {
+  useEffect(() => {
+    if (!open || !isLoaded || !user) return;
     updateProfile({
-      ...values,
-      profilePicture: avatarPreview || undefined,
+      firstName: user.firstName || profile.firstName,
+      lastName: user.lastName || profile.lastName,
+      email: user.primaryEmailAddress?.emailAddress || profile.email,
+      profilePicture: user.imageUrl || profile.profilePicture,
     });
-    setIsEditing(false);
+    setAvatarPreview(user.imageUrl || null);
+    setAvatarFile(null);
+  }, [isLoaded, open, profile.email, profile.firstName, profile.lastName, profile.profilePicture, updateProfile, user]);
+
+  const handleSave = async (values: typeof profile, setSubmitting: (s: boolean) => void) => {
+    setSubmitting(true);
+    try {
+      if (user) {
+        await user.update({
+          firstName: values.firstName,
+          lastName: values.lastName,
+        });
+        if (avatarFile) {
+          await user.setProfileImage({ file: avatarFile });
+        }
+      }
+
+      updateProfile({
+        ...values,
+        profilePicture: avatarPreview || user?.imageUrl || undefined,
+      });
+
+      notify({ message: "Profile updated successfully", severity: "success" });
+      setIsEditing(false);
+    } catch (error) {
+      notify({ message: (error as Error).message, severity: "error" });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
-    setAvatarPreview(profile.profilePicture || null);
+    setAvatarPreview(user?.imageUrl || profile.profilePicture || null);
+    setAvatarFile(null);
     setIsEditing(false);
   };
 
@@ -77,6 +121,7 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
         setAvatarPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+      setAvatarFile(file);
     }
   };
 
@@ -88,8 +133,11 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
       fullWidth
       PaperProps={{
         sx: {
-          bgcolor: "#1f2937",
+          bgcolor: "linear-gradient(135deg, #0f172a 0%, #111827 50%, #0b1220 100%)",
           color: "white",
+          border: "1px solid rgba(255,255,255,0.08)",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+          borderRadius: "20px",
         },
       }}
     >
@@ -98,12 +146,24 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          borderBottom: "1px solid #374151",
-          pb: 2,
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          pb: 2.5,
+          px: 3,
         }}
       >
-        <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
-          User Profile
+        <Typography
+          variant="h6"
+          component="span"
+          sx={{
+            fontWeight: "bold",
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            letterSpacing: 0.3,
+          }}
+        >
+          <ShieldIcon fontSize="small" className="text-purple-300" />
+          Admin Profile
         </Typography>
         <IconButton
           onClick={onClose}
@@ -116,23 +176,22 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ pt: 3 }}>
+      <DialogContent sx={{ pt: 3, px: 3 }}>
         <Formik
           initialValues={profile}
           validationSchema={validationSchema}
-          onSubmit={handleSave}
+          onSubmit={(values, { setSubmitting }) => handleSave(values, setSubmitting)}
           enableReinitialize
         >
-          {({ values, isValid, dirty }) => (
+          {({ values, isValid, dirty, isSubmitting }) => (
             <Form>
               <Stack spacing={3}>
-                {/* Avatar Section */}
                 <Box
                   sx={{
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: 2,
+                    gap: 1.5,
                   }}
                 >
                   <Avatar
@@ -142,8 +201,8 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
                       height: 120,
                       bgcolor: "#9333ea",
                       fontSize: "3rem",
-                      border: "3px solid",
-                      borderColor: "#a855f7",
+                      border: "3px solid rgba(168,85,247,0.5)",
+                      boxShadow: "0 15px 40px rgba(147,51,234,0.35)",
                     }}
                   >
                     {!avatarPreview &&
@@ -155,6 +214,7 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
                         type="button"
                         variant="outline"
                         as="span"
+                        className="border-white/20 text-white"
                       >
                         <CloudUploadIcon className="mr-2" style={{ fontSize: 20 }} />
                         Upload Photo
@@ -169,10 +229,10 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
                   )}
                 </Box>
 
-                <Divider sx={{ borderColor: "#374151" }} />
+                <Divider sx={{ borderColor: "rgba(255,255,255,0.1)" }} />
 
                 {/* Profile Information */}
-                <Stack spacing={2}>
+                <Stack spacing={2.5}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <PersonIcon sx={{ color: "#a855f7" }} />
                     <Typography variant="subtitle2" sx={{ color: "#9ca3af" }}>
@@ -198,12 +258,12 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
                     </Typography>
                   )}
 
-                  <Divider sx={{ borderColor: "#374151" }} />
+                <Divider sx={{ borderColor: "rgba(255,255,255,0.1)" }} />
 
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <EmailIcon sx={{ color: "#a855f7" }} />
-                    <Typography variant="subtitle2" sx={{ color: "#9ca3af" }}>
-                      Email Address
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <EmailIcon sx={{ color: "#a855f7" }} />
+                  <Typography variant="subtitle2" sx={{ color: "#9ca3af" }}>
+                    Email Address
                     </Typography>
                   </Box>
                   {isEditing ? (
@@ -217,7 +277,7 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
                     <Typography variant="body1">{values.email}</Typography>
                   )}
 
-                  <Divider sx={{ borderColor: "#374151" }} />
+                <Divider sx={{ borderColor: "rgba(255,255,255,0.1)" }} />
 
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <WorkIcon sx={{ color: "#a855f7" }} />
@@ -242,7 +302,7 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
                     />
                   )}
 
-                  <Divider sx={{ borderColor: "#374151" }} />
+                  <Divider sx={{ borderColor: "rgba(255,255,255,0.1)" }} />
 
                   <Box>
                     <Typography variant="subtitle2" sx={{ color: "#9ca3af", mb: 1 }}>
@@ -259,8 +319,8 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
                       <Paper
                         sx={{
                           p: 2,
-                          bgcolor: "#111827",
-                          border: "1px solid #374151",
+                          bgcolor: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.08)",
                           color: "gray.300",
                         }}
                       >
@@ -275,15 +335,43 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
 
               <DialogActions
                 sx={{
-                  borderTop: "1px solid #374151",
+                  borderTop: "1px solid rgba(255,255,255,0.08)",
                   px: 0,
                   py: 2,
                   gap: 1,
                   mt: 3,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
                 }}
               >
+                <Tooltip title="Secure sign-out powered by Clerk">
+                  <span>
+                    <CustomButton
+                      type="button"
+                      variant="outline"
+                      onClick={async () => {
+                        setSigningOut(true);
+                        try {
+                          await signOut();
+                          notify({ message: "Signed out successfully", severity: "success" });
+                        } catch (error) {
+                          notify({ message: (error as Error).message, severity: "error" });
+                        } finally {
+                          setSigningOut(false);
+                        }
+                      }}
+                      disabled={signingOut}
+                      className="text-red-300 border-red-300/40 hover:border-red-300"
+                    >
+                      <LogoutIcon className="mr-2" fontSize="small" />
+                      {signingOut ? "Signing out..." : "Sign out"}
+                    </CustomButton>
+                  </span>
+                </Tooltip>
+
                 {isEditing ? (
-                  <>
+                  <Box sx={{ display: "flex", gap: 1 }}>
                     <CustomButton
                       type="button"
                       variant="secondary"
@@ -294,11 +382,11 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
                     <CustomButton
                       type="submit"
                       variant="primary"
-                      disabled={!isValid || !dirty}
+                      disabled={!isValid || !dirty || isSubmitting}
                     >
-                      Save Changes
+                      {isSubmitting ? "Saving..." : "Save Changes"}
                     </CustomButton>
-                  </>
+                  </Box>
                 ) : (
                   <CustomButton
                     type="button"

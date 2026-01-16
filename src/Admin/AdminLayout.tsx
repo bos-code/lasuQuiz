@@ -35,7 +35,7 @@ interface AdminLayoutProps {
   children: ReactNode;
 }
 
-const drawerWidth = 256;
+const drawerWidth = 228;
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   console.count("AdminLayout render");
@@ -116,7 +116,10 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         height: "100%",
         bgcolor: "#1f2937",
         color: "white",
+        position: "relative",
       }}
+      onMouseEnter={() => !isMobile && sidebarCollapsed && setSidebarCollapsed(false)}
+      onMouseLeave={() => !isMobile && !sidebarCollapsed && setSidebarCollapsed(true)}
     >
       {/* Logo Section */}
       <Box
@@ -178,7 +181,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       </Box>
 
       {/* Search Section */}
-      <Box sx={{ p: 2, borderBottom: "1px solid #374151" }}>
+      <Box sx={{ p: 2, borderBottom: "1px solid #374151", display: sidebarCollapsed && !isMobile ? "none" : "block" }}>
         <TextField
           fullWidth
           size="small"
@@ -436,9 +439,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         <Box
           component="nav"
           sx={{
-            width: sidebarCollapsed ? 80 : drawerWidth,
+            width: sidebarCollapsed ? 72 : drawerWidth,
             flexShrink: 0,
-            transition: "width 0.3s",
+            transition: "width 0.2s ease",
           }}
         >
           <Drawer
@@ -447,9 +450,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             sx={{
               "& .MuiDrawer-paper": {
                 boxSizing: "border-box",
-                width: sidebarCollapsed ? 80 : drawerWidth,
+                width: sidebarCollapsed ? 72 : drawerWidth,
                 borderRight: "1px solid #374151",
-                transition: "width 0.3s",
+                transition: "width 0.2s ease",
               },
             }}
           >
@@ -481,21 +484,21 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
       {/* Main Content */}
       <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-          mt: { xs: "64px", md: 0 },
-          width: {
-            xs: "100%",
-            md: `calc(100% - ${sidebarCollapsed ? 80 : drawerWidth}px)`,
-          },
-          transition: "width 0.3s",
-        }}
-      >
-        {children}
+          component="main"
+          sx={{
+            flexGrow: 1,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            mt: { xs: "64px", md: 0 },
+            width: {
+              xs: "100%",
+              md: `calc(100% - ${sidebarCollapsed ? 72 : drawerWidth}px)`,
+            },
+            transition: "width 0.3s",
+          }}
+        >
+          {children}
       </Box>
 
       {/* Profile Modal */}

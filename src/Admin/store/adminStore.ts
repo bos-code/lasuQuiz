@@ -203,8 +203,8 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     firstName: "John",
     lastName: "Doe",
     email: "johndoe@gmail.com",
-    role: "Teacher",
-    bio: "Science teacher with 10+ years of experience. Passionate about making learning fun and engaging through interactive quizzes",
+    role: "Admin",
+    bio: "Admin overseeing quiz delivery, analytics, and secure authentication for the team.",
   },
   account: {
     currentPassword: "",
@@ -232,7 +232,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
   },
   // UI States - Initial values
   mobileOpen: false,
-  sidebarCollapsed: false,
+  sidebarCollapsed: true,
   profileModalOpen: false,
   userDetailModalOpen: false,
   selectedUser: null,
