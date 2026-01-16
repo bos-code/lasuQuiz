@@ -1,6 +1,5 @@
 import { useMemo, useCallback } from "react";
 import { useAdminStore } from "./store/adminStore";
-import { shallow } from "zustand/shallow";
 import { useNavigate } from "react-router-dom";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
@@ -14,26 +13,14 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 const Quizzes = () => {
   const navigate = useNavigate();
   
-  const {
-    activeQuizTab,
-    setActiveQuizTab,
-    quizSearch,
-    setQuizSearch,
-    selectedCategory,
-    setSelectedCategory,
-    quizzes,
-  } = useAdminStore(
-    (state) => ({
-      activeQuizTab: state.activeQuizTab,
-      setActiveQuizTab: state.setActiveQuizTab,
-      quizSearch: state.quizSearch,
-      setQuizSearch: state.setQuizSearch,
-      selectedCategory: state.selectedCategory,
-      setSelectedCategory: state.setSelectedCategory,
-      quizzes: state.quizzes,
-    }),
-    shallow
-  );
+  // Select primitives individually to keep getSnapshot stable
+  const activeQuizTab = useAdminStore((s) => s.activeQuizTab);
+  const setActiveQuizTab = useAdminStore((s) => s.setActiveQuizTab);
+  const quizSearch = useAdminStore((s) => s.quizSearch);
+  const setQuizSearch = useAdminStore((s) => s.setQuizSearch);
+  const selectedCategory = useAdminStore((s) => s.selectedCategory);
+  const setSelectedCategory = useAdminStore((s) => s.setSelectedCategory);
+  const quizzes = useAdminStore((s) => s.quizzes);
 
   // Memoize filtered quizzes to prevent infinite loop
   // Don't include getFilteredQuizzes in deps - it's stable, but we depend on the actual values

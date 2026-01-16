@@ -1,6 +1,5 @@
-import { useMemo, useCallback, memo } from "react";
+import { useMemo, useCallback } from "react";
 import { useAdminStore } from "./store/adminStore";
-import { shallow } from "zustand/shallow";
 import { useInfiniteLoopDetector } from "../utils/useInfiniteLoopDetector";
 import { SEO } from "../components/SEO";
 import { getBreadcrumbStructuredData } from "../utils/structuredData";
@@ -19,7 +18,6 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import PersonIcon from "@mui/icons-material/Person";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -30,31 +28,16 @@ const Students = () => {
   // Debug infinite loops in development (hook handles dev check internally)
   useInfiniteLoopDetector("Students");
 
-  // Use shallow comparison for multiple selectors
-  const {
-    headerSearch,
-    setHeaderSearch,
-    activeStudentTab,
-    setActiveStudentTab,
-    studentSearch,
-    setStudentSearch,
-    studentSortBy,
-    setStudentSortBy,
-    students,
-  } = useAdminStore(
-    (state) => ({
-      headerSearch: state.headerSearch,
-      setHeaderSearch: state.setHeaderSearch,
-      activeStudentTab: state.activeStudentTab,
-      setActiveStudentTab: state.setActiveStudentTab,
-      studentSearch: state.studentSearch,
-      setStudentSearch: state.setStudentSearch,
-      studentSortBy: state.studentSortBy,
-      setStudentSortBy: state.setStudentSortBy,
-      students: state.students,
-    }),
-    shallow
-  );
+  // Select individual slices to keep getSnapshot stable
+  const headerSearch = useAdminStore((s) => s.headerSearch);
+  const setHeaderSearch = useAdminStore((s) => s.setHeaderSearch);
+  const activeStudentTab = useAdminStore((s) => s.activeStudentTab);
+  const setActiveStudentTab = useAdminStore((s) => s.setActiveStudentTab);
+  const studentSearch = useAdminStore((s) => s.studentSearch);
+  const setStudentSearch = useAdminStore((s) => s.setStudentSearch);
+  const studentSortBy = useAdminStore((s) => s.studentSortBy);
+  const setStudentSortBy = useAdminStore((s) => s.setStudentSortBy);
+  const students = useAdminStore((s) => s.students);
 
   const filteredStudents = useMemo(() => {
     let filtered = students;
@@ -325,3 +308,94 @@ const Students = () => {
 };
 
 export default Students;
+
+type StudentRowProps = {
+  student: ReturnType<typeof useAdminStore.getState>["students"][number];
+  onUserClick: (user: any) => void;
+  getInitials: (name: string) => string;
+  getScoreColor: (score: number) => string;
+};
+
+const StudentRow = ({
+  student,
+  onUserClick,
+  getInitials,
+  getScoreColor,
+}: StudentRowProps) => {
+  return (
+    <TableRow
+      hover
+      sx={{
+        "&:hover": { bgcolor: "#2d3748" },
+        cursor: "pointer",
+      }}
+      onClick={() => onUserClick(student)}
+    >
+      <TableCell sx={{ color: "white", borderColor: "#374151" }}>
+        <div className="flex items-center gap-3">
+          <Avatar
+            sx={{
+              bgcolor: "#4f46e5",
+              width: 36,
+              height: 36,
+              fontSize: 14,
+              fontWeight: 600,
+            }}
+          >
+            {getInitials(student.name)}
+          </Avatar>
+          <div>
+            <div className="text-white font-medium">{student.name}</div>
+            <div className="text-gray-400 text-sm">{student.subject}</div>
+          </div>
+        </div>
+      </TableCell>
+      <TableCell sx={{ color: "white", borderColor: "#374151" }}>
+        {student.class}
+      </TableCell>
+      <TableCell sx={{ color: "white", borderColor: "#374151" }}>
+        {student.quizzesTaken}
+      </TableCell>
+      <TableCell sx={{ color: "white", borderColor: "#374151" }}>
+        <Chip
+          label={`${student.averageScore}%`}
+          sx={{
+            bgcolor: `${getScoreColor(student.averageScore)}1A`,
+            color: getScoreColor(student.averageScore),
+            fontWeight: 600,
+          }}
+          size="small"
+        />
+      </TableCell>
+      <TableCell sx={{ color: "white", borderColor: "#374151" }}>
+        {student.lastActive}
+      </TableCell>
+      <TableCell
+        sx={{
+          color: "white",
+          borderColor: "#374151",
+          display: "flex",
+          gap: 1,
+        }}
+      >
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            onUserClick(student);
+          }}
+          sx={{ color: "#9ca3af" }}
+        >
+          <VisibilityIcon fontSize="small" />
+        </IconButton>
+        <IconButton
+          size="small"
+          onClick={(e) => e.stopPropagation()}
+          sx={{ color: "#9ca3af" }}
+        >
+          <MoreVertIcon fontSize="small" />
+        </IconButton>
+      </TableCell>
+    </TableRow>
+  );
+};
