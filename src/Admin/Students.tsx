@@ -1,9 +1,11 @@
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState } from "react";
 import type { ChangeEvent } from "react";
 import { useAdminStore } from "./store/adminStore";
 import { useInfiniteLoopDetector } from "../utils/useInfiniteLoopDetector";
 import { SEO } from "../components/SEO";
 import { getBreadcrumbStructuredData } from "../utils/structuredData";
+import { useNotification } from "../components/NotificationProvider";
+import { supabase } from "../lib/supabaseClient";
 import {
   Table,
   TableBody,
@@ -27,7 +29,8 @@ import UserDetailModal from "./UserDetailModal";
 
 const Students = () => {
   // Debug infinite loops in development (hook handles dev check internally)
-  useInfiniteLoopDetector("Students");
+  useInfiniteLoopDetector("Users");
+  const notify = useNotification();
 
   // Select individual slices to keep getSnapshot stable
   const headerSearch = useAdminStore((s) => s.headerSearch);
@@ -75,8 +78,13 @@ const Students = () => {
   const userDetailModalOpen = useAdminStore((s) => s.userDetailModalOpen);
   const setUserDetailModalOpen = useAdminStore((s) => s.setUserDetailModalOpen);
 
-  const tabs: ("All Students" | "10A" | "10B")[] = useMemo(
-    () => ["All Students", "10A", "10B"],
+  const tabs = useMemo(
+    () =>
+      [
+        { value: "All Students" as const, label: "All Users" },
+        { value: "10A" as const, label: "10A" },
+        { value: "10B" as const, label: "10B" },
+      ],
     []
   );
 
@@ -131,14 +139,40 @@ const Students = () => {
 
   const breadcrumbs = getBreadcrumbStructuredData([
     { name: "Home", url: "/" },
-    { name: "Students", url: "/admin/students" },
+    { name: "Users", url: "/admin/students" },
   ]);
+
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteSending, setInviteSending] = useState(false);
+
+  const handleInvite = async () => {
+    if (!inviteEmail) {
+      notify({ message: "Please enter an email.", severity: "warning" });
+      return;
+    }
+    setInviteSending(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: inviteEmail,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      });
+      if (error) throw error;
+      notify({ message: "Invite sent! Ask the user to check their email.", severity: "success" });
+      setInviteEmail("");
+      setInviteOpen(false);
+    } catch (error) {
+      notify({ message: (error as Error).message, severity: "error" });
+    } finally {
+      setInviteSending(false);
+    }
+  };
 
   return (
     <>
       <SEO
-        title="Students"
-        description="Manage your students, track their progress, view quiz performance, and analyze results."
+        title="Users"
+        description="Manage your users, track their progress, view quiz performance, and analyze results."
         url="/admin/students"
         structuredData={breadcrumbs}
       />
@@ -162,9 +196,12 @@ const Students = () => {
             <AddIcon fontSize="small" />
             <span>Create Quiz</span>
           </button>
-          <button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+          <button
+            onClick={() => setInviteOpen(true)}
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+          >
             <PersonAddIcon fontSize="small" />
-            <span>Invite Students</span>
+            <span>Invite Users</span>
           </button>
         </div>
       </header>
@@ -174,19 +211,19 @@ const Students = () => {
         <div className="max-w-7xl mx-auto p-6">
           {/* Header */}
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-white mb-2">Students</h1>
+            <h1 className="text-3xl font-bold text-white mb-2">Users</h1>
             <p className="text-gray-400">
-              Manage your students and track their progress
+              Manage your users and track their progress
             </p>
           </div>
 
           {/* Student Directory Section */}
           <div className="mb-6">
             <h2 className="text-xl font-bold text-white mb-2">
-              Student Directory
+              User Directory
             </h2>
             <p className="text-gray-400 text-sm mb-4">
-              View and manage all your students
+              View and manage all your users
             </p>
 
             {/* Tabs and Filters */}
@@ -195,15 +232,15 @@ const Students = () => {
               <div className="flex gap-2 bg-gray-800 rounded-lg p-1 border border-gray-700">
                 {tabs.map((tab) => (
                   <button
-                    key={tab}
-                    onClick={() => handleTabChange(tab)}
+                    key={tab.value}
+                    onClick={() => handleTabChange(tab.value)}
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                      activeStudentTab === tab
+                      activeStudentTab === tab.value
                         ? "bg-gray-700 text-white"
                         : "text-gray-400 hover:text-white"
                     }`}
                   >
-                    {tab}
+                    {tab.label}
                   </button>
                 ))}
               </div>
@@ -216,7 +253,7 @@ const Students = () => {
                 />
                 <input
                   type="text"
-                  placeholder="Search students..."
+                  placeholder="Search users..."
                   value={studentSearch}
                   onChange={handleStudentSearchChange}
                   className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -276,7 +313,7 @@ const Students = () => {
                         colSpan={6}
                         sx={{ textAlign: "center", py: 4, color: "#9ca3af" }}
                       >
-                        No students found
+                        No users found
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -303,6 +340,47 @@ const Students = () => {
         onClose={handleCloseModal}
         user={selectedUser}
       />
+
+      {inviteOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-xl w-full max-w-md p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-white">Invite User</h3>
+                <p className="text-sm text-gray-400">
+                  Send a passwordless magic link to onboard a user.
+                </p>
+              </div>
+              <button
+                onClick={() => setInviteOpen(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                Close
+              </button>
+            </div>
+            <div className="space-y-3">
+              <label className="block text-sm text-gray-300">Email</label>
+              <input
+                type="email"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                placeholder="user@example.com"
+                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+              <button
+                onClick={handleInvite}
+                disabled={inviteSending}
+                className="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
+              >
+                {inviteSending ? "Sending..." : "Send invite"}
+              </button>
+              <p className="text-xs text-gray-500">
+                The invite uses a Supabase magic link and will redirect to /auth/callback.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

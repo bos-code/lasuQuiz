@@ -24,7 +24,6 @@ import {
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import EventIcon from "@mui/icons-material/Event";
 import PeopleIcon from "@mui/icons-material/People";
 import SettingsIcon from "@mui/icons-material/Settings";
 import SearchIcon from "@mui/icons-material/Search";
@@ -62,8 +61,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     () => [
       { name: "Dashboard", icon: DashboardIcon, path: "/admin" },
       { name: "Quizzes", icon: MenuBookIcon, path: "/admin/quizzes" },
-      { name: "Events", icon: EventIcon, path: "/admin/events" },
-      { name: "Students", icon: PeopleIcon, path: "/admin/students" },
+      { name: "Users", icon: PeopleIcon, path: "/admin/students" },
     ],
     []
   );

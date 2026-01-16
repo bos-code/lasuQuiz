@@ -13,15 +13,6 @@ interface Quiz {
   completionRate?: number;
 }
 
-interface Event {
-  id: string;
-  title: string;
-  date: string;
-  participants: number;
-  action: string;
-  isLive: boolean;
-}
-
 interface Student {
   id: string;
   name: string;
@@ -40,6 +31,21 @@ interface SummaryCard {
   change: string;
   icon: string;
   color: "purple" | "green" | "blue" | "orange";
+}
+
+interface NotificationSettings {
+  emailAlerts: boolean;
+  pushAlerts: boolean;
+  weeklyDigest: boolean;
+  productUpdates: boolean;
+  reminders: boolean;
+}
+
+interface PrivacySettings {
+  profileVisibility: "Public" | "Organization" | "Private";
+  showActivityStatus: boolean;
+  searchIndexing: boolean;
+  dataSharing: boolean;
 }
 
 interface AdminState {
@@ -83,14 +89,14 @@ interface AdminState {
   };
   appearance: {
     theme: "System" | "Light" | "Dark";
-    language: string;
     fontSize: "Small" | "Medium" | "Large";
     colorScheme: "Purple" | "Blue" | "Green" | "Orange" | "Pink" | "Red";
   };
+  notifications: NotificationSettings;
+  privacy: PrivacySettings;
 
   // Data
   quizzes: Quiz[];
-  events: Event[];
   students: Student[];
   summaryCards: SummaryCard[];
 
@@ -118,11 +124,12 @@ interface AdminState {
   updateAccount: (updates: Partial<AdminState["account"]>) => void;
   toggleGoogleConnection: () => void;
   updateAppearance: (updates: Partial<AdminState["appearance"]>) => void;
+  updateNotifications: (updates: Partial<NotificationSettings>) => void;
+  updatePrivacy: (updates: Partial<PrivacySettings>) => void;
   setQuizzes: (quizzes: Quiz[]) => void;
   addQuiz: (quiz: Quiz) => void;
   updateQuiz: (id: string, quiz: Partial<Quiz>) => void;
   deleteQuiz: (id: string) => void;
-  setEvents: (events: Event[]) => void;
   setStudents: (students: Student[]) => void;
   setSummaryCards: (cards: SummaryCard[]) => void;
   getFilteredQuizzes: () => Quiz[];
@@ -166,33 +173,6 @@ const initialQuizzes: Quiz[] = [
   },
 ];
 
-const initialEvents: Event[] = [
-  {
-    id: "1",
-    title: "Science Mid-term Quiz",
-    date: "Today, 2:30 PM",
-    participants: 32,
-    action: "View Live",
-    isLive: true,
-  },
-  {
-    id: "2",
-    title: "Mathematics Weekly Test",
-    date: "Tomorrow, 10:00 AM",
-    participants: 28,
-    action: "Manage",
-    isLive: false,
-  },
-  {
-    id: "3",
-    title: "History Final Exam",
-    date: "May 20, 9:00 AM",
-    participants: 45,
-    action: "Manage",
-    isLive: false,
-  },
-];
-
 const initialStudents: Student[] = [
   { id: "1", name: "Alex Johnson", subject: "Science", score: 950, avatar: "👤", class: "10A", quizzesTaken: 12, averageScore: 85, lastActive: "2 hours ago" },
   { id: "2", name: "Emma Watson", subject: "Mathematics", score: 920, avatar: "👤", class: "10A", quizzesTaken: 15, averageScore: 92, lastActive: "1 hour ago" },
@@ -204,7 +184,7 @@ const initialStudents: Student[] = [
 const initialSummaryCards: SummaryCard[] = [
   { title: "Total Quizzes", value: "2,543", change: "+12.5%", icon: "📖", color: "purple" },
   { title: "Active Events", value: "2,543", change: "+12.5%", icon: "📅", color: "green" },
-  { title: "Students", value: "2,543", change: "+12.5%", icon: "👥", color: "blue" },
+  { title: "Users", value: "2,543", change: "+12.5%", icon: "👥", color: "blue" },
   { title: "Avg. Completion", value: "2,543", change: "-12.5%", icon: "📊", color: "orange" },
 ];
 
@@ -234,9 +214,21 @@ export const useAdminStore = create<AdminState>((set, get) => ({
   },
   appearance: {
     theme: "Dark",
-    language: "English",
     fontSize: "Medium",
     colorScheme: "Purple",
+  },
+  notifications: {
+    emailAlerts: true,
+    pushAlerts: true,
+    weeklyDigest: false,
+    productUpdates: true,
+    reminders: true,
+  },
+  privacy: {
+    profileVisibility: "Organization",
+    showActivityStatus: true,
+    searchIndexing: false,
+    dataSharing: true,
   },
   // UI States - Initial values
   mobileOpen: false,
@@ -246,7 +238,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
   selectedUser: null,
   showBulkModal: false,
   quizzes: initialQuizzes,
-  events: initialEvents,
+  events: [],
   students: initialStudents,
   summaryCards: initialSummaryCards,
 
@@ -309,6 +301,8 @@ export const useAdminStore = create<AdminState>((set, get) => ({
   updateAccount: (updates) => set((state) => ({ account: { ...state.account, ...updates } })),
   toggleGoogleConnection: () => set((state) => ({ account: { ...state.account, googleConnected: !state.account.googleConnected } })),
   updateAppearance: (updates) => set((state) => ({ appearance: { ...state.appearance, ...updates } })),
+  updateNotifications: (updates) => set((state) => ({ notifications: { ...state.notifications, ...updates } })),
+  updatePrivacy: (updates) => set((state) => ({ privacy: { ...state.privacy, ...updates } })),
   setQuizzes: (quizzes) => set({ quizzes }),
   addQuiz: (quiz) => set((state) => ({ quizzes: [...state.quizzes, quiz] })),
   updateQuiz: (id, updates) =>
@@ -319,7 +313,6 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     set((state) => ({
       quizzes: state.quizzes.filter((q) => q.id !== id),
     })),
-  setEvents: (events) => set({ events }),
   setStudents: (students) => set({ students }),
   setSummaryCards: (cards) => set({ summaryCards: cards }),
 
@@ -415,4 +408,3 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     return filtered;
   },
 }));
-

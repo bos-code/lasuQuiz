@@ -11,12 +11,15 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import GoogleIcon from "@mui/icons-material/Google";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 // import PaletteIcon from "@mui/icons-material/Palette";?
-import LanguageIcon from "@mui/icons-material/Language";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness6Icon from "@mui/icons-material/Brightness6";
 import ComputerIcon from "@mui/icons-material/Computer";
 import CheckIcon from "@mui/icons-material/Check";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import LockIcon from "@mui/icons-material/Lock";
+import SecurityIcon from "@mui/icons-material/Security";
+import ShieldIcon from "@mui/icons-material/Shield";
 
 const Settings = () => {
   const notify = useNotification();
@@ -31,6 +34,10 @@ const Settings = () => {
   const toggleGoogleConnection = useAdminStore((s) => s.toggleGoogleConnection);
   const appearance = useAdminStore((s) => s.appearance);
   const updateAppearance = useAdminStore((s) => s.updateAppearance);
+  const notifications = useAdminStore((s) => s.notifications);
+  const updateNotifications = useAdminStore((s) => s.updateNotifications);
+  const privacy = useAdminStore((s) => s.privacy);
+  const updatePrivacy = useAdminStore((s) => s.updatePrivacy);
 
   const [formData, setFormData] = useState(profile);
   const [passwordData, setPasswordData] = useState({
@@ -50,14 +57,12 @@ const Settings = () => {
     | "Notifications"
     | "Appearance"
     | "Privacy"
-    | "Billing"
   )[] = [
     "Profile",
     "Account",
     "Notifications",
     "Appearance",
     "Privacy",
-    "Billing",
   ];
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
@@ -109,6 +114,18 @@ const Settings = () => {
 
   const handleHeaderSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     setHeaderSearch(event.target.value);
+  };
+
+  const toggleNotificationSetting = (key: keyof typeof notifications) => {
+    updateNotifications({ [key]: !notifications[key] });
+  };
+
+  const togglePrivacySetting = (key: keyof typeof privacy) => {
+    const value =
+      typeof privacy[key] === "boolean"
+        ? !(privacy[key] as boolean)
+        : privacy[key];
+    updatePrivacy({ [key]: value } as Partial<typeof privacy>);
   };
 
   return (
@@ -462,29 +479,6 @@ const Settings = () => {
                 </div>
               </div>
 
-              {/* Language Section */}
-              <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-                <div className="mb-6">
-                  <h2 className="text-xl font-bold text-white mb-2">
-                    Language
-                  </h2>
-                  <p className="text-gray-400 text-sm">
-                    Select your preferred language
-                  </p>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <LanguageIcon className="text-2xl text-gray-400" />
-                    <span className="text-white font-medium">
-                      {appearance.language}
-                    </span>
-                  </div>
-                  <button className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors">
-                    Change Language
-                  </button>
-                </div>
-              </div>
-
               {/* Font Size Section */}
               <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
                 <div className="mb-6">
@@ -495,16 +489,30 @@ const Settings = () => {
                     Adjust the font size to your preference
                   </p>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <TextFieldsIcon className="text-2xl text-gray-400" />
-                    <span className="text-white font-medium">
-                      {appearance.fontSize}
-                    </span>
-                  </div>
-                  <button className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors">
-                    Change Font Size
-                  </button>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {(
+                    [
+                      { value: "Small", label: "Compact", hint: "More content density" },
+                      { value: "Medium", label: "Comfort", hint: "Balanced for reading" },
+                      { value: "Large", label: "Relaxed", hint: "Bigger labels and text" },
+                    ] as const
+                  ).map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => updateAppearance({ fontSize: option.value })}
+                      className={`p-4 rounded-lg border-2 text-left transition-colors flex items-start gap-3 ${
+                        appearance.fontSize === option.value
+                          ? "border-purple-600 bg-purple-600/10"
+                          : "border-gray-600 bg-gray-900 hover:border-gray-500"
+                      }`}
+                    >
+                      <TextFieldsIcon className="text-xl text-gray-300" />
+                      <div>
+                        <p className="text-white font-semibold">{option.label}</p>
+                        <p className="text-gray-400 text-sm">{option.hint}</p>
+                      </div>
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -569,17 +577,134 @@ const Settings = () => {
             </div>
           )}
 
-          {/* Other Tabs Placeholder */}
-          {activeSettingsTab !== "Profile" &&
-            activeSettingsTab !== "Account" &&
-            activeSettingsTab !== "Appearance" && (
+          {/* Notifications Tab */}
+          {activeSettingsTab === "Notifications" && (
+            <div className="space-y-6">
               <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-                <h2 className="text-xl font-bold text-white mb-2">
-                  {activeSettingsTab}
-                </h2>
-                <p className="text-gray-400">This section is coming soon.</p>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Alerts</h2>
+                    <p className="text-gray-400 text-sm">
+                      Choose how you want to be notified.
+                    </p>
+                  </div>
+                  <NotificationsActiveIcon className="text-purple-400" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {(
+                    [
+                      { key: "emailAlerts", label: "Email alerts", hint: "Messages, invites, and quiz updates to your inbox." },
+                      { key: "pushAlerts", label: "Push notifications", hint: "Show real-time alerts in the dashboard." },
+                      { key: "weeklyDigest", label: "Weekly digest", hint: "A weekly summary of activity and performance." },
+                      { key: "productUpdates", label: "Product updates", hint: "Release notes and new feature highlights." },
+                      { key: "reminders", label: "Reminders", hint: "Nudges for upcoming events and due tasks." },
+                    ] as const
+                  ).map((item) => {
+                    const enabled = notifications[item.key];
+                    return (
+                      <div
+                        key={item.key}
+                        className="p-4 bg-gray-900 border border-gray-700 rounded-lg flex items-start justify-between gap-3"
+                      >
+                        <div>
+                          <p className="text-white font-medium">{item.label}</p>
+                          <p className="text-gray-400 text-sm">{item.hint}</p>
+                        </div>
+                        <button
+                          onClick={() => toggleNotificationSetting(item.key)}
+                          className={`px-3 py-1 rounded-full text-sm font-semibold transition-colors ${
+                            enabled
+                              ? "bg-green-500/20 text-green-200 border border-green-500/40"
+                              : "bg-gray-700 text-gray-200 border border-gray-600"
+                          }`}
+                        >
+                          {enabled ? "On" : "Off"}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            )}
+            </div>
+          )}
+
+          {/* Privacy Tab */}
+          {activeSettingsTab === "Privacy" && (
+            <div className="space-y-6">
+              <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Privacy Controls</h2>
+                    <p className="text-gray-400 text-sm">Control visibility and data sharing.</p>
+                  </div>
+                  <ShieldIcon className="text-purple-400" />
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-400 mb-3">Profile visibility</p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {(
+                      [
+                        { value: "Public", label: "Public", hint: "Visible to anyone with a link." },
+                        { value: "Organization", label: "Organization", hint: "Only your team can view." },
+                        { value: "Private", label: "Private", hint: "Only you can view." },
+                      ] as const
+                    ).map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => updatePrivacy({ profileVisibility: option.value })}
+                        className={`p-4 rounded-lg border-2 text-left transition-colors ${
+                          privacy.profileVisibility === option.value
+                            ? "border-purple-600 bg-purple-600/10"
+                            : "border-gray-600 bg-gray-900 hover:border-gray-500"
+                        }`}
+                      >
+                        <p className="text-white font-semibold">{option.label}</p>
+                        <p className="text-gray-400 text-sm">{option.hint}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {(
+                    [
+                      { key: "showActivityStatus", label: "Show activity status", hint: "Display when you were last active.", icon: LockIcon },
+                      { key: "searchIndexing", label: "Search indexing", hint: "Allow search engines to index your profile.", icon: SecurityIcon },
+                      { key: "dataSharing", label: "Data sharing", hint: "Share anonymized usage data to improve the product.", icon: ShieldIcon },
+                    ] as const
+                  ).map((item) => {
+                    const Icon = item.icon;
+                    const enabled = privacy[item.key];
+                    return (
+                      <div
+                        key={item.key}
+                        className="p-4 bg-gray-900 border border-gray-700 rounded-lg flex items-start justify-between gap-3"
+                      >
+                        <div className="flex items-start gap-3">
+                          <Icon className="text-gray-400" />
+                          <div>
+                            <p className="text-white font-medium">{item.label}</p>
+                            <p className="text-gray-400 text-sm">{item.hint}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => togglePrivacySetting(item.key)}
+                          className={`px-3 py-1 rounded-full text-sm font-semibold transition-colors ${
+                            enabled
+                              ? "bg-green-500/20 text-green-200 border border-green-500/40"
+                              : "bg-gray-700 text-gray-200 border border-gray-600"
+                          }`}
+                        >
+                          {enabled ? "On" : "Off"}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Footer */}
           <div className="mt-6 text-center text-gray-400 text-sm">

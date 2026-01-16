@@ -6,8 +6,6 @@ import { SEO } from "../components/SEO";
 import { getBreadcrumbStructuredData } from "../utils/structuredData";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
-import EventIcon from "@mui/icons-material/Event";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import EventNoteIcon from "@mui/icons-material/EventNote";
@@ -24,7 +22,6 @@ const Dashboard = () => {
   const headerSearch = useAdminStore((s) => s.headerSearch);
   const setHeaderSearch = useAdminStore((s) => s.setHeaderSearch);
   const summaryCards = useAdminStore((s) => s.summaryCards);
-  const recentEvents = useAdminStore((s) => s.events);
   const topStudents = useAdminStore((s) => s.students);
   const quizzes = useAdminStore((s) => s.quizzes);
 
@@ -65,7 +62,7 @@ const Dashboard = () => {
     <>
       <SEO
         title="Dashboard"
-        description="View your quiz analytics, recent events, top students, and manage your quizzes from the dashboard."
+        description="View your quiz analytics, top users, and manage your quizzes from the dashboard."
         url="/admin"
         structuredData={breadcrumbs}
       />
@@ -158,54 +155,14 @@ const Dashboard = () => {
 
           {/* Main Sections Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-            {/* Recent Events */}
+            {/* Top Users */}
             <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
               <div className="mb-6">
                 <h2 className="text-xl font-bold text-white mb-2">
-                  Recent Events
+                  Top Users
                 </h2>
                 <p className="text-gray-400 text-sm">
-                  Manage your upcoming and active quiz events
-                </p>
-              </div>
-              <div className="space-y-4">
-                {recentEvents.map((event) => (
-                  <div
-                    key={event.id}
-                    className="bg-gray-700/50 rounded-lg p-4 flex items-center gap-4 border border-gray-600"
-                  >
-                    <EventIcon className="text-3xl text-gray-300" />
-                    <div className="flex-1">
-                      <h3 className="text-white font-semibold mb-1">
-                        {event.title}
-                      </h3>
-                      <p className="text-gray-400 text-sm mb-1">{event.date}</p>
-                      <p className="text-gray-400 text-sm">
-                        {event.participants} participants
-                      </p>
-                    </div>
-                    <button
-                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                        event.isLive
-                          ? "bg-green-600 hover:bg-green-700 text-white"
-                          : "bg-gray-600 hover:bg-gray-500 text-white"
-                      }`}
-                    >
-                      {event.action}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Top Students */}
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-              <div className="mb-6">
-                <h2 className="text-xl font-bold text-white mb-2">
-                  Top Students
-                </h2>
-                <p className="text-gray-400 text-sm">
-                  Students with highest quiz scores
+                  Users with highest quiz scores
                 </p>
               </div>
               <div className="space-y-3">
@@ -224,11 +181,8 @@ const Dashboard = () => {
                       </h3>
                       <p className="text-gray-400 text-sm">{student.subject}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <EmojiEventsIcon className="text-xl text-yellow-400" />
-                      <span className="text-white font-bold">
-                        {student.score}
-                      </span>
+                    <div className="flex items-center gap-2 text-white font-bold">
+                      <span>{student.score}</span>
                     </div>
                   </div>
                 ))}

@@ -119,7 +119,7 @@ const QuizDetail = () => {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-bold text-white mb-2">Recent Completions</h2>
-                <p className="text-gray-400 text-sm">Students who recently completed this quiz</p>
+                <p className="text-gray-400 text-sm">Users who recently completed this quiz</p>
               </div>
               <button className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors">
                 View All Results
@@ -200,7 +200,6 @@ const QuizDetail = () => {
 };
 
 export default QuizDetail;
-
 
 
 

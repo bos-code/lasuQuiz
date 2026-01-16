@@ -6,6 +6,7 @@ import Settings from "./Settings";
 import QuizDetail from "./QuizDetail";
 import CreateQuiz from "./CreateQuiz";
 import AddQuestions from "./AddQuestions";
+import ReviewQuiz from "./ReviewQuiz";
 
 const AdminRoutes = () => {
   return (
@@ -14,6 +15,7 @@ const AdminRoutes = () => {
       <Route path="quizzes" element={<Quizzes />} />
       <Route path="quizzes/create" element={<CreateQuiz />} />
       <Route path="quizzes/create/questions" element={<AddQuestions />} />
+      <Route path="quizzes/create/review" element={<ReviewQuiz />} />
       <Route path="quizzes/:id" element={<QuizDetail />} />
       <Route path="students" element={<Students />} />
       <Route path="settings" element={<Settings />} />
@@ -22,9 +24,6 @@ const AdminRoutes = () => {
 };
 
 export default AdminRoutes;
-
-
-
 
 
 
