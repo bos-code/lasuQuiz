@@ -24,7 +24,6 @@ import PersonIcon from "@mui/icons-material/Person";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import LogoutIcon from "@mui/icons-material/Logout";
 import ShieldIcon from "@mui/icons-material/Shield";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useAdminStore } from "./store/adminStore";
 import { TextInput, TextArea, Button as CustomButton } from "../components/forms";
 import { useUser } from "@clerk/clerk-react";

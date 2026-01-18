@@ -53,10 +53,9 @@ const SignUpPage = () => {
                   socialButtons:
                     "grid grid-cols-1 gap-2 [&_button]:!bg-gray-800 [&_button]:!border-gray-700 [&_button:hover]:!border-indigo-500/70",
                   formFieldInput:
-                    "bg-gray-800 border border-gray-700 text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500",
+                "bg-gray-800 border border-gray-700 text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500",
                 },
               }}
-              socialLayout="button"
               // Enable Google, Discord, X(Twitter) via Clerk dashboard configuration
             />
           </div>

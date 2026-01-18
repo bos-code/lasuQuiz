@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   }, [isLoaded, isSignedIn, user, userId]);
 
   const signInWithMagicLink = async (email: string) => {
-    throw new Error("Magic link sign-in is disabled. Use email/password or social login.");
+    throw new Error(`Magic link sign-in is disabled for ${email}. Use email/password or social login.`);
   };
 
   const signInWithProvider = async (provider: "google") => {
