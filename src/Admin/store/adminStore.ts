@@ -6,6 +6,7 @@ interface Quiz {
   title: string;
   status: "Published" | "Draft";
   description: string;
+  category?: string;
   questions: number;
   duration: number;
   completions: number;
@@ -76,6 +77,7 @@ interface AdminState {
   profile: {
     firstName: string;
     lastName: string;
+    nickName?: string;
     email: string;
     role: string;
     bio: string;
@@ -143,6 +145,7 @@ const initialQuizzes: Quiz[] = [
     title: "Introduction to Biology",
     status: "Published",
     description: "Basic concepts of biology for beginners",
+    category: "Science",
     questions: 15,
     duration: 20,
     completions: 32,
@@ -154,6 +157,7 @@ const initialQuizzes: Quiz[] = [
     title: "Advanced Mathematics",
     status: "Published",
     description: "Complex mathematical problems and solutions",
+    category: "Mathematics",
     questions: 25,
     duration: 45,
     completions: 28,
@@ -165,6 +169,7 @@ const initialQuizzes: Quiz[] = [
     title: "Chemistry Fundamentals",
     status: "Draft",
     description: "Introduction to chemical reactions and compounds",
+    category: "Chemistry",
     questions: 20,
     duration: 30,
     completions: 0,
@@ -200,11 +205,11 @@ export const useAdminStore = create<AdminState>((set, get) => ({
   studentSortBy: "Name",
   activeSettingsTab: "Profile",
   profile: {
-    firstName: "John",
-    lastName: "Doe",
-    email: "johndoe@gmail.com",
-    role: "Admin",
-    bio: "Admin overseeing quiz delivery, analytics, and secure authentication for the team.",
+    firstName: "",
+    lastName: "",
+    email: "",
+    role: "",
+    bio: "",
   },
   account: {
     currentPassword: "",

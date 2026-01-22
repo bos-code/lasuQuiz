@@ -204,7 +204,7 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
                       boxShadow: "0 15px 40px rgba(147,51,234,0.35)",
                     }}
                   >
-                    {!avatarPreview &&
+                    {!avatarPreview && values.firstName && values.lastName &&
                       `${values.firstName[0]}${values.lastName[0]}`}
                   </Avatar>
                   {isEditing && (
@@ -273,7 +273,13 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
                       placeholder="Enter email address"
                     />
                   ) : (
-                    <Typography variant="body1">{values.email}</Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{ maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "block" }}
+                      title={values.email}
+                    >
+                      {values.email}
+                    </Typography>
                   )}
 
                 <Divider sx={{ borderColor: "rgba(255,255,255,0.1)" }} />

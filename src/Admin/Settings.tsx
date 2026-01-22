@@ -192,23 +192,46 @@ const Settings = () => {
               </div>
 
               <div className="flex flex-col lg:flex-row gap-6">
-                {/* Profile Picture Section */}
-                <div className="flex-shrink-0">
-                  <div className="w-32 h-32 bg-gray-700 rounded-full flex items-center justify-center mb-4">
-                    {formData.profilePicture ? (
-                      <img
-                        src={formData.profilePicture}
-                        alt="Profile"
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <PersonIcon className="text-4xl text-gray-400" />
-                    )}
+                {/* Profile Card */}
+                <div className="lg:w-72">
+                  <div className="relative overflow-hidden rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-900/60 via-gray-900 to-gray-900 p-5 shadow-xl">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(168,85,247,0.3),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(14,165,233,0.25),transparent_40%)] pointer-events-none" />
+                    <div className="relative flex flex-col items-center gap-3">
+                      <div className="p-1.5 rounded-full bg-gradient-to-br from-purple-500 to-blue-400">
+                        <div className="w-28 h-28 bg-gray-900 rounded-full flex items-center justify-center overflow-hidden">
+                          {formData.profilePicture ? (
+                            <img
+                              src={formData.profilePicture}
+                              alt="Profile"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <PersonIcon className="text-4xl text-gray-300" />
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-center space-y-1">
+                        <p className="text-lg font-semibold text-white truncate">
+                          {formData.nickName ||
+                            [formData.firstName, formData.lastName].filter(Boolean).join(" ") ||
+                            "Your name"}
+                        </p>
+                        <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-600/20 text-purple-100 border border-purple-500/40">
+                          {formData.role || "Admin"}
+                        </div>
+                        <p
+                          className="text-sm text-gray-300 truncate"
+                          title={formData.email}
+                        >
+                          {formData.email || "you@example.com"}
+                        </p>
+                      </div>
+                      <button className="w-full px-4 py-2 bg-white/10 hover:bg-white/15 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-white/10">
+                        <CloudUploadIcon fontSize="small" />
+                        <span>Change Photo</span>
+                      </button>
+                    </div>
                   </div>
-                  <button className="w-full px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
-                    <CloudUploadIcon fontSize="small" />
-                    <span>Change Photo</span>
-                  </button>
                 </div>
 
                 {/* Form Fields */}
@@ -224,6 +247,18 @@ const Settings = () => {
                         onChange={(e) =>
                           handleInputChange("firstName", e.target.value)
                         }
+                        className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Nickname
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.nickName ?? ""}
+                        onChange={(e) => handleInputChange("nickName", e.target.value)}
+                        placeholder="What should we call you?"
                         className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
                     </div>

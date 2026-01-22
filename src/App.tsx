@@ -8,6 +8,7 @@ import SignInPage from "./pages/auth/SignInPage";
 import SignUpPage from "./pages/auth/SignUpPage";
 import "./App.css";
 import { NotificationProvider } from "./components/NotificationProvider";
+import { useAuth } from "./components/Auth/AuthProvider";
 
 const Protected = ({ children }: { children: React.ReactElement }) => (
   <>
@@ -17,6 +18,24 @@ const Protected = ({ children }: { children: React.ReactElement }) => (
     </SignedOut>
   </>
 );
+
+const AdminOnly = ({ children }: { children: React.ReactElement }) => {
+  const { profile, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-950 text-gray-200 flex items-center justify-center">
+        Checking permissions...
+      </div>
+    );
+  }
+
+  if (profile?.role !== "admin") {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
 
 function App() {
   return (
@@ -34,9 +53,11 @@ function App() {
           path="/admin/*"
           element={
             <Protected>
-              <AdminLayout>
-                <AdminRoutes />
-              </AdminLayout>
+              <AdminOnly>
+                <AdminLayout>
+                  <AdminRoutes />
+                </AdminLayout>
+              </AdminOnly>
             </Protected>
           }
         />

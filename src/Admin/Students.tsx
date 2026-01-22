@@ -1,10 +1,12 @@
 import { useMemo, useCallback, useState } from "react";
 import type { ChangeEvent } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAdminStore } from "./store/adminStore";
 import { useInfiniteLoopDetector } from "../utils/useInfiniteLoopDetector";
 import { SEO } from "../components/SEO";
 import { getBreadcrumbStructuredData } from "../utils/structuredData";
 import { useNotification } from "../components/NotificationProvider";
+import { getStudents, fallbackStudents } from "../lib/api/students";
 import {
   Table,
   TableBody,
@@ -30,6 +32,14 @@ const Students = () => {
   // Debug infinite loops in development (hook handles dev check internally)
   useInfiniteLoopDetector("Users");
   const notify = useNotification();
+  const { data: students = fallbackStudents, isLoading } = useQuery({
+    queryKey: ["students"],
+    queryFn: getStudents,
+    placeholderData: fallbackStudents,
+    staleTime: 30_000,
+    onError: (error) =>
+      notify({ message: `Unable to load users: ${(error as Error).message}`, severity: "error" }),
+  });
 
   // Select individual slices to keep getSnapshot stable
   const headerSearch = useAdminStore((s) => s.headerSearch);
@@ -40,7 +50,6 @@ const Students = () => {
   const setStudentSearch = useAdminStore((s) => s.setStudentSearch);
   const studentSortBy = useAdminStore((s) => s.studentSortBy);
   const setStudentSortBy = useAdminStore((s) => s.setStudentSortBy);
-  const students = useAdminStore((s) => s.students);
 
   const filteredStudents = useMemo(() => {
     let filtered = students;
@@ -311,7 +320,14 @@ const Students = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredStudents.length === 0 ? (
+                  {isLoading && (
+                    <TableRow>
+                      <TableCell colSpan={6} sx={{ textAlign: "center", py: 3, color: "#9ca3af" }}>
+                        Loading users...
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {!isLoading && filteredStudents.length === 0 ? (
                     <TableRow>
                       <TableCell
                         colSpan={6}
