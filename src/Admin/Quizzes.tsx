@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNotification } from "../components/NotificationProvider";
 import { getQuizzes, fallbackQuizzes } from "../lib/api/quizzes";
@@ -16,15 +16,22 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 const Quizzes = () => {
   const navigate = useNavigate();
   const notify = useNotification();
-  const { data: quizzes = fallbackQuizzes, isLoading } = useQuery({
+  const {
+    data: quizzes = fallbackQuizzes,
+    isLoading,
+    error: quizzesError,
+  } = useQuery({
     queryKey: ["quizzes"],
     queryFn: getQuizzes,
     placeholderData: fallbackQuizzes,
     staleTime: 30_000,
-    onError: (error) => {
-      notify({ message: `Unable to load quizzes: ${(error as Error).message}`, severity: "error" });
-    },
   });
+
+  useEffect(() => {
+    if (!quizzesError) return;
+    const message = quizzesError instanceof Error ? quizzesError.message : String(quizzesError);
+    notify({ message: `Unable to load quizzes: ${message}`, severity: "error" });
+  }, [notify, quizzesError]);
   
   // Select primitives individually to keep getSnapshot stable
   const activeQuizTab = useAdminStore((s) => s.activeQuizTab);

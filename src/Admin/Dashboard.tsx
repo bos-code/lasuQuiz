@@ -1,4 +1,4 @@
-import { useMemo, useCallback, memo } from "react";
+import { useMemo, useCallback, memo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAdminStore } from "./store/adminStore";
@@ -29,27 +29,53 @@ const Dashboard = () => {
   const goHome = useCallback(() => {
     navigate("/");
   }, [navigate]);
-  const { data: summaryCards = fallbackSummaryCards, isLoading: summaryLoading } = useQuery({
+  const showError = useCallback(
+    (error: unknown, prefix: string) => {
+      const message = error instanceof Error ? error.message : String(error);
+      notify({ message: `${prefix}: ${message}`, severity: "error" });
+    },
+    [notify]
+  );
+  const {
+    data: summaryCards = fallbackSummaryCards,
+    isLoading: summaryLoading,
+    error: summaryError,
+  } = useQuery({
     queryKey: ["summary-cards"],
     queryFn: getSummaryCards,
     placeholderData: fallbackSummaryCards,
     staleTime: 30_000,
-    onError: (error) => notify({ message: `Summary failed: ${(error as Error).message}`, severity: "error" }),
   });
-  const { data: topStudents = fallbackStudents, isLoading: studentsLoading } = useQuery({
+  const {
+    data: topStudents = fallbackStudents,
+    isLoading: studentsLoading,
+    error: studentsError,
+  } = useQuery({
     queryKey: ["students"],
     queryFn: getStudents,
     placeholderData: fallbackStudents,
     staleTime: 30_000,
-    onError: (error) => notify({ message: `Students failed: ${(error as Error).message}`, severity: "error" }),
   });
-  const { data: quizzes = fallbackQuizzes, isLoading: quizzesLoading } = useQuery({
+  const {
+    data: quizzes = fallbackQuizzes,
+    isLoading: quizzesLoading,
+    error: quizzesError,
+  } = useQuery({
     queryKey: ["quizzes"],
     queryFn: getQuizzes,
     placeholderData: fallbackQuizzes,
     staleTime: 30_000,
-    onError: (error) => notify({ message: `Quizzes failed: ${(error as Error).message}`, severity: "error" }),
   });
+
+  useEffect(() => {
+    if (summaryError) showError(summaryError, "Summary failed");
+  }, [showError, summaryError]);
+  useEffect(() => {
+    if (studentsError) showError(studentsError, "Students failed");
+  }, [showError, studentsError]);
+  useEffect(() => {
+    if (quizzesError) showError(quizzesError, "Quizzes failed");
+  }, [quizzesError, showError]);
 
   const recentQuizzes = useMemo(
     () => quizzes.filter((q) => q.completionRate !== undefined),

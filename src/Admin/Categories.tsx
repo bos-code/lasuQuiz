@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import CategoryIcon from "@mui/icons-material/Category";
@@ -20,13 +20,22 @@ const Categories = () => {
   const notify = useNotification();
   const { setCategory } = useCreateQuizStore();
 
-  const { data: quizzes = fallbackQuizzes, isLoading } = useQuery({
+  const {
+    data: quizzes = fallbackQuizzes,
+    isLoading,
+    error: quizzesError,
+  } = useQuery({
     queryKey: ["quizzes"],
     queryFn: getQuizzes,
     placeholderData: fallbackQuizzes,
     staleTime: 30_000,
-    onError: (error) => notify({ message: `Unable to load quizzes: ${(error as Error).message}`, severity: "error" }),
   });
+
+  useEffect(() => {
+    if (!quizzesError) return;
+    const message = quizzesError instanceof Error ? quizzesError.message : String(quizzesError);
+    notify({ message: `Unable to load quizzes: ${message}`, severity: "error" });
+  }, [notify, quizzesError]);
 
   const categories = useMemo<CategoryStat[]>(() => {
     const map = new Map<string, CategoryStat>();

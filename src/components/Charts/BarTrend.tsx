@@ -44,10 +44,14 @@ export const BarTrend = ({ title, subtitle, data, color = "#a855f7" }: BarTrendP
         backgroundColor: "#0f172a",
         borderColor: "rgba(148,163,184,0.3)",
         style: { color: "#e2e8f0" },
-        formatter: function () {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const point = this.point as any;
-          return `<strong>${point.category}</strong><br/>${point.y}`;
+        formatter: function (this: Highcharts.Point) {
+          const category =
+            typeof this.category === "string"
+              ? this.category
+              : typeof this.x === "string"
+                ? this.x
+                : String(this.x ?? "");
+          return `<strong>${category}</strong><br/>${this.y}`;
         },
       },
       series: [

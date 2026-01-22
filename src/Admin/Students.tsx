@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, useEffect } from "react";
 import type { ChangeEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAdminStore } from "./store/adminStore";
@@ -32,14 +32,22 @@ const Students = () => {
   // Debug infinite loops in development (hook handles dev check internally)
   useInfiniteLoopDetector("Users");
   const notify = useNotification();
-  const { data: students = fallbackStudents, isLoading } = useQuery({
+  const {
+    data: students = fallbackStudents,
+    isLoading,
+    error: studentsError,
+  } = useQuery({
     queryKey: ["students"],
     queryFn: getStudents,
     placeholderData: fallbackStudents,
     staleTime: 30_000,
-    onError: (error) =>
-      notify({ message: `Unable to load users: ${(error as Error).message}`, severity: "error" }),
   });
+
+  useEffect(() => {
+    if (!studentsError) return;
+    const message = studentsError instanceof Error ? studentsError.message : String(studentsError);
+    notify({ message: `Unable to load users: ${message}`, severity: "error" });
+  }, [notify, studentsError]);
 
   // Select individual slices to keep getSnapshot stable
   const headerSearch = useAdminStore((s) => s.headerSearch);
