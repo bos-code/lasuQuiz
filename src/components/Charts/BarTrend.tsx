@@ -18,6 +18,7 @@ export const BarTrend = ({ title, subtitle, data, color = "#a855f7" }: BarTrendP
         spacing: [10, 10, 10, 10],
         animation: { duration: 600 },
       },
+      accessibility: { enabled: false },
       title: { text: undefined },
       credits: { enabled: false },
       legend: { enabled: false },

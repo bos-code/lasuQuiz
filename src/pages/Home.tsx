@@ -6,16 +6,27 @@ import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { SEO } from "../components/SEO";
 import { getWebsiteStructuredData } from "../utils/structuredData";
+import { useAuth } from "../components/Auth/AuthProvider";
+import { UserButton } from "@clerk/clerk-react";
 
 const Home = () => {
   const navigate = useNavigate();
+  const { session, profile, loading } = useAuth();
+  const isAuthed = !!session && !loading;
 
-  const highlights = [
-    { title: "SSO ready", body: "Google, Discord, Twitter, and password login powered by Clerk.", icon: <SecurityIcon fontSize="small" /> },
-    { title: "Analytics first", body: "Precision tracking for attempts, completions, and grade curves.", icon: <TimelineIcon fontSize="small" /> },
-    { title: "Authoring built-in", body: "Design quizzes, schedule releases, and automate grading.", icon: <RocketLaunchIcon fontSize="small" /> },
-    { title: "Student focus", body: "Accessible layouts, saved progress, and fast resume.", icon: <EmojiEventsIcon fontSize="small" /> },
-  ];
+  const highlights = isAuthed && profile?.role === "admin"
+    ? [
+        { title: "Instant publishing", body: "Create quizzes, set schedules, and push live in seconds.", icon: <RocketLaunchIcon fontSize="small" /> },
+        { title: "Analytics first", body: "Precision tracking for attempts, completions, and grade curves.", icon: <TimelineIcon fontSize="small" /> },
+        { title: "Role-aware access", body: "Clerk + RLS enforce admin-only authoring and safe student views.", icon: <SecurityIcon fontSize="small" /> },
+        { title: "Bulk authoring", body: "Paste questions in bulk and auto-structure them for Supabase.", icon: <EmojiEventsIcon fontSize="small" /> },
+      ]
+    : [
+        { title: "SSO ready", body: "Google, Discord, Twitter, and password login powered by Clerk.", icon: <SecurityIcon fontSize="small" /> },
+        { title: "Adaptive practice", body: "Timed questions, lives, and difficulty tags keep you sharp.", icon: <TimelineIcon fontSize="small" /> },
+        { title: "Resume anytime", body: "Progress-aware play so you can hop in and out with no stress.", icon: <RocketLaunchIcon fontSize="small" /> },
+        { title: "Earn achievements", body: "Track streaks, scores, and compete on leaderboards.", icon: <EmojiEventsIcon fontSize="small" /> },
+      ];
 
   const stats = [
     { label: "Active learners", value: "12.4k" },
@@ -47,25 +58,52 @@ const Home = () => {
               <h1 className="text-2xl font-bold">Quizzy</h1>
             </div>
           </div>
-          <div className="hidden sm:flex items-center gap-3">
-            <button
-              onClick={() => navigate("/")}
-              className="px-4 py-2 rounded-lg border border-white/10 text-sm text-gray-200 hover:border-white/30 transition-colors"
-            >
-              Home
-            </button>
-            <button
-              onClick={() => navigate("/sign-in")}
-              className="px-4 py-2 rounded-lg border border-white/10 text-sm text-gray-200 hover:border-white/30 transition-colors"
-            >
-              Sign in
-            </button>
-            <button
-              onClick={() => navigate("/sign-up")}
-              className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-500 text-sm font-semibold shadow-lg shadow-purple-500/20 hover:brightness-110 transition"
-            >
-              Get started
-            </button>
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-3">
+              <button
+                onClick={() => navigate("/")}
+                className="px-4 py-2 rounded-lg border border-white/10 text-sm text-gray-200 hover:border-white/30 transition-colors"
+              >
+                Home
+              </button>
+              {!isAuthed && (
+                <>
+                  <button
+                    onClick={() => navigate("/sign-in")}
+                    className="px-4 py-2 rounded-lg border border-white/10 text-sm text-gray-200 hover:border-white/30 transition-colors"
+                  >
+                    Sign in
+                  </button>
+                  <button
+                    onClick={() => navigate("/sign-up")}
+                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-500 text-sm font-semibold shadow-lg shadow-purple-500/20 hover:brightness-110 transition"
+                  >
+                    Get started
+                  </button>
+                </>
+              )}
+              {isAuthed && (
+                <button
+                  onClick={() => navigate(profile?.role === "admin" ? "/admin" : "/quiz/1")}
+                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-500 text-sm font-semibold shadow-lg shadow-purple-500/20 hover:brightness-110 transition"
+                >
+                  {profile?.role === "admin" ? "Dashboard" : "Start learning"}
+                </button>
+              )}
+            </div>
+            {isAuthed && (
+              <UserButton
+                appearance={{
+                  elements: {
+                    rootBox:
+                      "relative inline-flex items-center justify-center rounded-full p-[2px] bg-gradient-to-r from-purple-500 via-blue-400 to-indigo-500 shadow-lg shadow-purple-600/30",
+                    avatarBox:
+                      "w-10 h-10 bg-gray-900 rounded-full border border-white/10 shadow-inner shadow-purple-500/30",
+                  },
+                }}
+                afterSignOutUrl="/"
+              />
+            )}
           </div>
         </header>
 
@@ -120,7 +158,9 @@ const Home = () => {
                     </div>
                     <div className="space-y-1">
                       <p className="font-semibold">{item.title}</p>
-                      <p className="text-sm text-gray-400 leading-relaxed">{item.body}</p>
+                      <p className="text-sm text-gray-400 leading-relaxed">
+                        {isAuthed ? `[${profile?.role ?? "user"}] ` : ""}{item.body}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -138,18 +178,29 @@ const Home = () => {
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <button
-                onClick={() => navigate("/sign-up")}
-                className="px-5 py-3 rounded-xl bg-white text-gray-900 font-semibold shadow-lg hover:shadow-xl transition"
-              >
-                Create account
-              </button>
-              <button
-                onClick={() => navigate("/sign-in")}
-                className="px-5 py-3 rounded-xl border border-white/30 text-white hover:border-white/50 transition"
-              >
-                Sign in
-              </button>
+              {!isAuthed ? (
+                <>
+                  <button
+                    onClick={() => navigate("/sign-up")}
+                    className="px-5 py-3 rounded-xl bg-white text-gray-900 font-semibold shadow-lg hover:shadow-xl transition"
+                  >
+                    Create account
+                  </button>
+                  <button
+                    onClick={() => navigate("/sign-in")}
+                    className="px-5 py-3 rounded-xl border border-white/30 text-white hover:border-white/50 transition"
+                  >
+                    Sign in
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => navigate(profile?.role === "admin" ? "/admin" : "/quiz/1")}
+                  className="px-5 py-3 rounded-xl bg-white text-gray-900 font-semibold shadow-lg hover:shadow-xl transition"
+                >
+                  {profile?.role === "admin" ? "Go to dashboard" : "Continue learning"}
+                </button>
+              )}
             </div>
           </section>
         </main>

@@ -29,7 +29,7 @@ interface User {
   subject: string;
   score: number;
   avatar: string;
-  class: string;
+  gender?: "male" | "female" | null;
   quizzesTaken: number;
   averageScore: number;
   lastActive: string;
@@ -123,7 +123,7 @@ const UserDetailModal = memo(
                   {user.name}
                 </Typography>
                 <Chip
-                  label={user.class}
+                  label={user.gender ? user.gender : "N/A"}
                   icon={<SchoolIcon />}
                   sx={{
                     bgcolor: "#9333ea",

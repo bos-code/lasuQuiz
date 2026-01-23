@@ -24,14 +24,14 @@ const RecentQuizzes = ({ quizzes, loading, onCreate }: RecentQuizzesProps) => (
         >
           <ArrowForwardIcon className="absolute top-4 right-4 text-gray-400 group-hover:text-purple-400 transition-colors" />
           <h3 className="text-white font-semibold mb-2 pr-8">{quiz.title}</h3>
-          <p className="text-gray-400 text-sm mb-4">
+          <div className="text-gray-400 text-sm mb-4 flex flex-wrap gap-2 items-center">
             <span className="inline-flex items-center gap-1">
               <Odometer value={quiz.questions} /> questions,
-            </span>{" "}
+            </span>
             <span className="inline-flex items-center gap-1">
               <Odometer value={quiz.completions} /> completions
             </span>
-          </p>
+          </div>
           <div className="flex items-center gap-2">
             <div className="flex-1 h-2 bg-gray-600 rounded-full overflow-hidden">
               <div className="h-full bg-purple-600 rounded-full" style={{ width: `${quiz.completionRate}%` }}></div>

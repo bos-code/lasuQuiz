@@ -20,7 +20,7 @@ interface Student {
   subject: string;
   score: number;
   avatar: string;
-  class: string;
+  gender?: "male" | "female" | null;
   quizzesTaken: number;
   averageScore: number;
   lastActive: string;
@@ -60,9 +60,9 @@ interface AdminState {
   selectedCategory: string;
 
   // Student filter states
-  activeStudentTab: "All Students" | "10A" | "10B";
+  activeStudentTab: "All Students" | "male" | "female";
   studentSearch: string;
-  studentSortBy: string;
+  studentSortBy: "Name" | "Gender" | "Average Score";
 
   // Settings states
   activeSettingsTab: "Profile" | "Account" | "Notifications" | "Appearance" | "Privacy" | "Billing";
@@ -108,9 +108,9 @@ interface AdminState {
   setQuizSearch: (search: string) => void;
   setActiveQuizTab: (tab: "All Quizzes" | "Published" | "Drafts") => void;
   setSelectedCategory: (category: string) => void;
-  setActiveStudentTab: (tab: "All Students" | "10A" | "10B") => void;
+  setActiveStudentTab: (tab: "All Students" | "male" | "female") => void;
   setStudentSearch: (search: string) => void;
-  setStudentSortBy: (sortBy: string) => void;
+  setStudentSortBy: (sortBy: "Name" | "Gender" | "Average Score") => void;
   setActiveSettingsTab: (tab: "Profile" | "Account" | "Notifications" | "Appearance" | "Privacy" | "Billing") => void;
   
   // UI Actions
@@ -179,11 +179,11 @@ const initialQuizzes: Quiz[] = [
 ];
 
 const initialStudents: Student[] = [
-  { id: "1", name: "Alex Johnson", subject: "Science", score: 950, avatar: "👤", class: "10A", quizzesTaken: 12, averageScore: 85, lastActive: "2 hours ago" },
-  { id: "2", name: "Emma Watson", subject: "Mathematics", score: 920, avatar: "👤", class: "10A", quizzesTaken: 15, averageScore: 92, lastActive: "1 hour ago" },
-  { id: "3", name: "Michael Clark", subject: "Physics", score: 980, avatar: "👤", class: "10B", quizzesTaken: 18, averageScore: 88, lastActive: "30 minutes ago" },
-  { id: "4", name: "Sophia Green", subject: "English", score: 890, avatar: "👤", class: "10A", quizzesTaken: 10, averageScore: 79, lastActive: "5 hours ago" },
-  { id: "5", name: "Lucia Wilde", subject: "Science", score: 870, avatar: "👤", class: "10B", quizzesTaken: 14, averageScore: 83, lastActive: "3 hours ago" },
+  { id: "1", name: "Alex Johnson", subject: "Science", score: 950, avatar: "👤", gender: "male", quizzesTaken: 12, averageScore: 85, lastActive: "2 hours ago" },
+  { id: "2", name: "Emma Watson", subject: "Mathematics", score: 920, avatar: "👤", gender: "female", quizzesTaken: 15, averageScore: 92, lastActive: "1 hour ago" },
+  { id: "3", name: "Michael Clark", subject: "Physics", score: 980, avatar: "👤", gender: "male", quizzesTaken: 18, averageScore: 88, lastActive: "30 minutes ago" },
+  { id: "4", name: "Sophia Green", subject: "English", score: 890, avatar: "👤", gender: "female", quizzesTaken: 10, averageScore: 79, lastActive: "5 hours ago" },
+  { id: "5", name: "Lucia Wilde", subject: "Science", score: 870, avatar: "👤", gender: "female", quizzesTaken: 14, averageScore: 83, lastActive: "3 hours ago" },
 ];
 
 const initialSummaryCards: SummaryCard[] = [
@@ -389,7 +389,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
     // Filter by tab
     if (state.activeStudentTab !== "All Students") {
-      filtered = filtered.filter((s) => s.class === state.activeStudentTab);
+      filtered = filtered.filter((s) => s.gender === state.activeStudentTab);
     }
 
     // Filter by search
@@ -397,15 +397,15 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       const searchLower = state.studentSearch.toLowerCase();
       filtered = filtered.filter((s) =>
         s.name.toLowerCase().includes(searchLower) ||
-        s.class.toLowerCase().includes(searchLower)
+        (s.gender ?? "").toLowerCase().includes(searchLower)
       );
     }
 
     // Sort by selected field
     if (state.studentSortBy === "Name") {
       filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
-    } else if (state.studentSortBy === "Class") {
-      filtered = [...filtered].sort((a, b) => a.class.localeCompare(b.class));
+    } else if (state.studentSortBy === "Gender") {
+      filtered = [...filtered].sort((a, b) => (a.gender ?? "").localeCompare(b.gender ?? ""));
     } else if (state.studentSortBy === "Average Score") {
       filtered = [...filtered].sort((a, b) => b.averageScore - a.averageScore);
     }

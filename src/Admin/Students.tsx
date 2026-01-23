@@ -64,7 +64,7 @@ const Students = () => {
 
     // Filter by tab
     if (activeStudentTab !== "All Students") {
-      filtered = filtered.filter((s) => s.class === activeStudentTab);
+      filtered = filtered.filter((s) => s.gender === activeStudentTab);
     }
 
     // Filter by search
@@ -73,15 +73,15 @@ const Students = () => {
       filtered = filtered.filter(
         (s) =>
           s.name.toLowerCase().includes(searchLower) ||
-          s.class.toLowerCase().includes(searchLower)
+          (s.gender ?? "").toLowerCase().includes(searchLower)
       );
     }
 
     // Sort by selected field
     if (studentSortBy === "Name") {
       filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
-    } else if (studentSortBy === "Class") {
-      filtered = [...filtered].sort((a, b) => a.class.localeCompare(b.class));
+    } else if (studentSortBy === "Gender") {
+      filtered = [...filtered].sort((a, b) => (a.gender ?? "").localeCompare(b.gender ?? ""));
     } else if (studentSortBy === "Average Score") {
       filtered = [...filtered].sort((a, b) => b.averageScore - a.averageScore);
     }
@@ -98,8 +98,8 @@ const Students = () => {
     () =>
       [
         { value: "All Students" as const, label: "All Users" },
-        { value: "10A" as const, label: "10A" },
-        { value: "10B" as const, label: "10B" },
+        { value: "male" as const, label: "Male" },
+        { value: "female" as const, label: "Female" },
       ],
     []
   );
@@ -140,18 +140,18 @@ const Students = () => {
   }, []);
 
   const handleTabChange = useCallback(
-    (tab: "All Students" | "10A" | "10B") => {
+    (tab: "All Students" | "male" | "female") => {
       setActiveStudentTab(tab);
     },
     [setActiveStudentTab]
   );
 
   const handleSortToggle = useCallback(() => {
-    const options = ["Name", "Class", "Average Score"];
-    const currentIndex = options.indexOf(studentSortBy);
+    const options: Array<"Name" | "Gender" | "Average Score"> = ["Name", "Gender", "Average Score"];
+    const currentIndex = options.indexOf(studentSortBy as any);
     const nextIndex = (currentIndex + 1) % options.length;
     setStudentSortBy(options[nextIndex]);
-  }, [studentSortBy, setStudentSortBy]);
+  }, [setStudentSortBy, studentSortBy]);
 
   const breadcrumbs = getBreadcrumbStructuredData([
     { name: "Home", url: "/" },
@@ -311,7 +311,7 @@ const Students = () => {
                       Name
                     </TableCell>
                     <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                      Class
+                      Gender
                     </TableCell>
                     <TableCell sx={{ color: "white", fontWeight: "bold" }}>
                       Quizzes Taken
@@ -456,8 +456,8 @@ const StudentRow = ({
           </div>
         </div>
       </TableCell>
-      <TableCell sx={{ color: "white", borderColor: "#374151" }}>
-        {student.class}
+      <TableCell sx={{ color: "white", borderColor: "#374151", textTransform: "capitalize" }}>
+        {student.gender ?? "—"}
       </TableCell>
       <TableCell sx={{ color: "white", borderColor: "#374151" }}>
         {student.quizzesTaken}

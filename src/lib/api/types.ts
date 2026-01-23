@@ -19,7 +19,7 @@ export type Student = {
   subject: string;
   score: number;
   avatar: string;
-  class: string;
+  gender?: "male" | "female" | null;
   quizzesTaken: number;
   averageScore: number;
   lastActive: string;

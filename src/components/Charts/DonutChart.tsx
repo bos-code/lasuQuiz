@@ -31,6 +31,7 @@ export const DonutChart = ({ title, value, total = 100, segments }: DonutChartPr
         backgroundColor: "transparent",
         height: 260,
       },
+      accessibility: { enabled: false },
       title: { text: undefined },
       credits: { enabled: false },
       legend: {

@@ -1,8 +1,9 @@
 import { useCallback, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCreateQuizStore } from "./store/createQuizStore";
-import { useAdminStore } from "./store/adminStore";
+import { createQuizWithQuestions } from "../lib/api/quizzes";
 import QuizPreviewModal from "./QuizPreviewModal";
 import { useNotification } from "../components/NotificationProvider";
 import { useInfiniteLoopDetector } from "../utils/useInfiniteLoopDetector";
@@ -21,6 +22,8 @@ const ReviewQuiz = () => {
   const navigate = useNavigate();
   const notify = useNotification();
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [submitting, setSubmitting] = useState<"draft" | "publish" | null>(null);
+  const queryClient = useQueryClient();
 
   const quizTitle = useCreateQuizStore((s) => s.quizTitle);
   const description = useCreateQuizStore((s) => s.description);
@@ -33,59 +36,67 @@ const ReviewQuiz = () => {
   const questions = useCreateQuizStore((s) => s.questions);
   const resetForm = useCreateQuizStore((s) => s.resetForm);
 
-  const addQuiz = useAdminStore((s) => s.addQuiz);
-
   const totalPoints = useMemo(
     () => questions.reduce((sum, question) => sum + (question.points || 0), 0),
     [questions]
   );
 
-  const handlePublish = useCallback(() => {
-    if (!quizTitle.trim()) {
-      notify({ message: "Please add a quiz title before publishing.", severity: "warning" });
-      return;
-    }
+  const persistQuiz = useCallback(
+    async (status: "Published" | "Draft") => {
+      if (!quizTitle.trim()) {
+        notify({ message: "Please add a quiz title before continuing.", severity: "warning" });
+        return;
+      }
+      if (questions.length === 0) {
+        notify({ message: "Add at least one question first.", severity: "warning" });
+        return;
+      }
 
-    if (questions.length === 0) {
-      notify({ message: "Add at least one question before publishing.", severity: "warning" });
-      return;
-    }
+      setSubmitting(status === "Published" ? "publish" : "draft");
+      try {
+        await createQuizWithQuestions({
+          title: quizTitle,
+          description,
+          category,
+          status,
+          duration: timeLimit,
+          passingScore,
+          randomizeQuestions,
+          immediateResults,
+          difficultyLevel: difficultyLevel,
+          questions,
+        });
 
-    addQuiz({
-      id: Date.now().toString(),
-      title: quizTitle,
-      status: "Published",
-      description: description || "Published quiz from builder",
+        await queryClient.invalidateQueries({ queryKey: ["quizzes"] });
+        resetForm();
+        notify({
+          message: status === "Published" ? "Quiz published to Supabase." : "Draft saved to Supabase.",
+          severity: "success",
+        });
+        navigate("/admin/quizzes");
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        notify({ message: `Save failed: ${message}`, severity: "error" });
+      } finally {
+        setSubmitting(null);
+      }
+    },
+    [
       category,
-      questions: questions.length,
-      duration: timeLimit,
-      completions: 0,
-      created: "Created just now",
-      completionRate: 0,
-    });
-
-    resetForm();
-    notify({ message: "Quiz published and added to the library!", severity: "success" });
-    navigate("/admin/quizzes");
-  }, [addQuiz, description, navigate, notify, questions.length, quizTitle, resetForm, timeLimit]);
-
-  const handleSaveDraft = useCallback(() => {
-    addQuiz({
-      id: Date.now().toString(),
-      title: quizTitle || "Untitled quiz",
-      status: "Draft",
-      description: description || "Draft quiz from builder",
-      category,
-      questions: questions.length,
-      duration: timeLimit,
-      completions: 0,
-      created: "Saved just now",
-      completionRate: 0,
-    });
-    resetForm();
-    notify({ message: "Draft saved to quizzes.", severity: "success" });
-    navigate("/admin/quizzes");
-  }, [addQuiz, description, navigate, notify, questions.length, quizTitle, resetForm, timeLimit]);
+      description,
+      difficultyLevel,
+      immediateResults,
+      navigate,
+      notify,
+      passingScore,
+      queryClient,
+      questions,
+      quizTitle,
+      randomizeQuestions,
+      resetForm,
+      timeLimit,
+    ]
+  );
 
   return (
     <>
@@ -102,10 +113,11 @@ const ReviewQuiz = () => {
             </button>
             <div className="flex items-center gap-3">
               <button
-                onClick={handleSaveDraft}
-                className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+                onClick={() => persistQuiz("Draft")}
+                disabled={submitting !== null}
+                className="px-4 py-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
               >
-                Save Draft
+                {submitting === "draft" ? "Saving..." : "Save Draft"}
               </button>
               <button
                 onClick={() => setPreviewOpen(true)}
@@ -115,11 +127,12 @@ const ReviewQuiz = () => {
                 <span>Preview</span>
               </button>
               <button
-                onClick={handlePublish}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                onClick={() => persistQuiz("Published")}
+                disabled={submitting !== null}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center gap-2"
               >
                 <PublishIcon fontSize="small" />
-                <span>Publish Quiz</span>
+                <span>{submitting === "publish" ? "Publishing..." : "Publish Quiz"}</span>
               </button>
             </div>
           </div>
@@ -256,11 +269,12 @@ const ReviewQuiz = () => {
                 </p>
                 <div className="flex flex-col gap-2">
                   <button
-                    onClick={handlePublish}
-                    className="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                    onClick={() => persistQuiz("Published")}
+                    disabled={submitting !== null}
+                    className="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                   >
                     <PublishIcon fontSize="small" />
-                    <span>Publish Now</span>
+                    <span>{submitting === "publish" ? "Publishing..." : "Publish Now"}</span>
                   </button>
                   <button
                     onClick={() => setPreviewOpen(true)}
@@ -270,10 +284,11 @@ const ReviewQuiz = () => {
                     <span>Preview</span>
                   </button>
                   <button
-                    onClick={handleSaveDraft}
-                    className="w-full px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors border border-gray-700"
+                    onClick={() => persistQuiz("Draft")}
+                    disabled={submitting !== null}
+                    className="w-full px-4 py-3 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors border border-gray-700"
                   >
-                    Save as Draft
+                    {submitting === "draft" ? "Saving..." : "Save as Draft"}
                   </button>
                 </div>
               </div>

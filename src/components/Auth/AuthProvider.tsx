@@ -34,12 +34,15 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [session, setSession] = useState<AuthContextValue["session"]>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const resolveRole = (email: string | null, currentUser: typeof user): Profile["role"] => {
-    const metadataRole =
-      (currentUser?.publicMetadata?.role as Profile["role"] | undefined) ??
-      (currentUser?.unsafeMetadata?.role as Profile["role"] | undefined);
+  const normalizeRole = (value: unknown): Profile["role"] | undefined => {
+    if (value === "admin" || value === "admins") return "admin";
+    if (value === "user" || value === "users") return "user";
+    return undefined;
+  };
 
-    if (metadataRole === "admin" || metadataRole === "user") return metadataRole;
+  const resolveRole = (email: string | null, currentUser: typeof user): Profile["role"] => {
+    const metadataRole = normalizeRole(currentUser?.publicMetadata?.role) ?? normalizeRole(currentUser?.unsafeMetadata?.role);
+    if (metadataRole) return metadataRole;
     return email === DEFAULT_ADMIN_EMAIL ? "admin" : "user";
   };
 
