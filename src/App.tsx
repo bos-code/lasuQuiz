@@ -9,6 +9,7 @@ import SignUpPage from "./pages/auth/SignUpPage";
 import "./App.css";
 import { NotificationProvider } from "./components/NotificationProvider";
 import { useAuth } from "./components/Auth/AuthProvider";
+import MouseOrb from "./components/MouseOrb";
 
 const Protected = ({ children }: { children: React.ReactElement }) => (
   <>
@@ -40,6 +41,7 @@ const AdminOnly = ({ children }: { children: React.ReactElement }) => {
 function App() {
   return (
     <NotificationProvider>
+      <MouseOrb />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/sign-in/*" element={<SignInPage />} />
